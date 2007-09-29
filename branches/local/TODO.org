@@ -1,0 +1,16 @@
+* DONE Need to implement a callback mechanism.
+* TODO Need to write a method of connecting to external servers as clients and feeding
+  that to eventloop.
+* TODO Need to figure out a way to invoke callbacks, and let workers handle the
+  incoming data and requests.
+* TODO Not very clear about organisation of workers.
+* TODO A way to allow other threads to run, while main event loop is running using Thread.pass thingy.
+* TODO Need to detect disconnection and reconnection of client connections.
+* DONE Use CPU worker to calculate 10+20 and return the result to client.
+* TODO Implement connection from workers.
+* TODO Implement io workers properly.
+* TODO Implement outgoing connections from master process properly.
+* TODO Implement tcp socket no_delay everywhere for faster access to data.
+* TODO Data passed to workers could be anything.
+* TODO Lots of code duplication between worker and packet files because nature of functions these two are
+  using is somewhat similar.
