@@ -92,6 +92,11 @@ module Packet
       end
 
       def close_connection
+
+      end
+
+      def close_connection_after_writing
+
       end
 
       def socket_really_connected?(t_sock)
