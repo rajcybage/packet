@@ -74,15 +74,13 @@ module Packet
 
         def close_connection
           unbind
-          reactor.connections.delete(connection.fileno)
-          connection.close
+          reactor.remove_connection(connection)
         end
 
         def close_connection_after_writing
           connection.flush
           unbind
-          reactor.connections.delete(connection.fileno)
-          connection.close
+          reactor.remove_connection(connection)
         end
 
         def send_object p_object
