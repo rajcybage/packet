@@ -2,7 +2,9 @@ Packet is a library for writing networking applications in Ruby.
 It follows Evented Model of network programming and implements almost all the
 features provided by EventMachine.
 
-It also provides real UNIX workers for concurrent programming.
+It also provides real UNIX workers for concurrent programming. Each worker has 
+reactor loop of its own and getting long running tasks done in workers is easy.
+
 
 Copyright (c) 2007 Hemant Kumar(mail@gnufied.org),Ezra Zygmuntowicz
 
