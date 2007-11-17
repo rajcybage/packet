@@ -52,19 +52,43 @@ module Packet
       end
     end
 
-    # this method is being duplicated between packet and worker classes, may be its a good idea to merge them.
+    # FIXME: this method is being duplicated between packet and worker classes, may be its a
+    # good idea to merge them.
     def provide_workers(handler_instance,connection)
       class << handler_instance
         extend Forwardable
         attr_accessor :worker, :connection, :reactor, :initialized, :signature
         include NbioHelper
         def send_data p_data
-          write_data(p_data,connection)
+          begin
+            write_data(p_data,connection)
+          rescue Errno::EPIPE
+            # probably a callback
+          end
         end
+
         def invoke_init
           @initialized = true
           post_init
         end
+
+        def close_connection
+          unbind
+          reactor.connections.delete(connection.fileno)
+          connection.close
+        end
+
+        def close_connection_after_writing
+          connection.flush
+          unbind
+          reactor.connections.delete(connection.fileno)
+          connection.close
+        end
+
+        def send_object p_object
+          dump_object(p_object,connection)
+        end
+
         def_delegators :@reactor, :start_server, :connect, :add_periodic_timer, :add_timer, :cancel_timer,:reconnect
       end
       handler_instance.connection = connection
