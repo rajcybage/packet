@@ -75,6 +75,9 @@ module Packet
     end
 
     # method loads workers in new processes
+    # FIXME: this method can be fixed, so as worker code can be actually, required
+    # only in forked process and hence saving upon the memory involved
+    # where worker is actually required in master as well as in worker.
     def load_workers
       @live_workers = DoubleKeyedHash.new
       if defined?(WORKER_ROOT)
