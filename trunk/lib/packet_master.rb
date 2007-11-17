@@ -33,6 +33,16 @@ module Packet
         end
 
         def close_connection
+          unbind
+          reactor.connections.delete(connection.fileno)
+          connection.close
+        end
+
+        def close_connection_after_writing
+          connection.flush
+          unbind
+          reactor.connections.delete(connection.fileno)
+          connection.close
         end
 
         def ask_worker(*args)
