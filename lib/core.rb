@@ -91,12 +91,12 @@ module Packet
         connection_completion_awaited.delete(t_sock.fileno)
       end
 
-      def close_connection
-
-      end
-
-      def close_connection_after_writing
-
+      # method removes the connection and closes the socket
+      def remove_connection(t_sock)
+        @read_ios.delete(t_sock)
+        @write_ios.delete(t_sock)
+        connections.delete(t_sock.fileno)
+        t_sock.close
       end
 
       def socket_really_connected?(t_sock)

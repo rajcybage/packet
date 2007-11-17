@@ -12,19 +12,20 @@ class Foo
   def worker_receive p_data
     p "***************** : in worker receive of main #{p_data[:data]}"
     send_data "#{p_data[:data]}\n"
+    close_connection_after_writing
   end
 
   def show_result p_data
     send_data("#{p_data[:response]}\n")
   end
 
-  def connect_back
-    puts "Attempting a reconnection : #{Time.now}"
-    reconnect("localhost",11006,self)
-  end
+#   def connect_back
+#     puts "Attempting a reconnection : #{Time.now}"
+#     reconnect("localhost",11006,self)
+#   end
 
   def unbind
-    add_timer(5) { connect_back }
+    puts "remove client close the connection"
   end
 
   def connection_completed
