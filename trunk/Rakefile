@@ -1,3 +1,4 @@
+require 'rubygems'
 require 'rake'
 require 'rake/clean'
 require 'rake/gempackagetask'
@@ -45,7 +46,7 @@ spec = Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
   s.has_rdoc = true
   s.extra_rdoc_files = ["README", "LICENSE", 'TODO']
-  #s.rdoc_options += RDOC_OPTS + 
+  #s.rdoc_options += RDOC_OPTS +
   #  ['--exclude', '^(app|uploads)']
   s.summary = "Packet, Events... we got em."
   s.description = s.summary
@@ -54,8 +55,8 @@ spec = Gem::Specification.new do |s|
   s.homepage = 'http://code.google.com/p/packet/'
   s.required_ruby_version = '>= 1.8.4'
 
-  s.files = %w(LICENSE README Rakefile TODO) + Dir.glob("{bin,spec,lib,examples,script}/**/*") 
-      
+  s.files = %w(LICENSE README Rakefile TODO) + Dir.glob("{bin,spec,lib,examples,script}/**/*")
+
   s.require_path = "lib"
   s.bindir = "bin"
 end

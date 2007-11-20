@@ -203,11 +203,7 @@ module Packet
       def check_for_timer_events
         @timer_hash.each do |key,timer|
           if timer.run_now?
-            #begin
             timer.run
-            #             rescue
-            #               @timer_hash.delete(key)
-            #             end
             @timer_hash.delete(key) if !timer.respond_to?(:interval)
           end
         end

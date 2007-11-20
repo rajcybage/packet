@@ -10,6 +10,7 @@ module Packet
 
     def self.run
       master_reactor_instance = new
+      master_reactor_instance.live_workers = DoubleKeyedHash.new
       yield(master_reactor_instance)
       master_reactor_instance.load_workers
       master_reactor_instance.start_reactor
@@ -53,7 +54,7 @@ module Packet
         def send_object p_object
           dump_object(p_object,connection)
         end
-        def_delegators :@reactor, :start_server, :connect, :add_periodic_timer, :add_timer, :cancel_timer,:reconnect
+        def_delegators :@reactor, :start_server, :connect, :add_periodic_timer, :add_timer, :cancel_timer,:reconnect, :start_worker
       end
       handler_instance.workers = @live_workers
       handler_instance.connection = t_sock
@@ -79,7 +80,7 @@ module Packet
     # only in forked process and hence saving upon the memory involved
     # where worker is actually required in master as well as in worker.
     def load_workers
-      @live_workers = DoubleKeyedHash.new
+
       if defined?(WORKER_ROOT)
         worker_root = WORKER_ROOT
       else
@@ -91,17 +92,25 @@ module Packet
         worker_name = File.basename(b_worker,".rb")
         require worker_name
         worker_klass = Object.const_get(worker_name.classify)
+        next if worker_klass.no_auto_load
         fork_and_load(worker_klass)
       end
 
-      # FIXME: easiest and yet perhaps a bit ugly
+      # FIXME: easiest and yet perhaps a bit ugly, its just to make sure that from each
+      # worker proxy one can access other workers
       @live_workers.each do |key,worker_instance|
         worker_instance.workers = @live_workers
       end
     end
 
+    def start_worker(worker_name,options = {})
+      require worker_name.to_s
+      worker_klass = Object.const_get(worker_name.classify)
+      fork_and_load(worker_klass,options)
+    end
+
     # method forks given worker file in a new process
-    def fork_and_load(worker_klass)
+    def fork_and_load(worker_klass,worker_options = { })
       t_worker_name = worker_klass.worker_name
       worker_pimp = worker_klass.worker_proxy.to_s
 
@@ -109,20 +118,18 @@ module Packet
       master_read_end,worker_write_end = UNIXSocket.pair(Socket::SOCK_STREAM)
       # socket to which master process is going to write
       worker_read_end,master_write_end = UNIXSocket.pair(Socket::SOCK_STREAM)
-
       worker_read_fd,master_write_fd = UNIXSocket.pair
+
       if((pid = fork()).nil?)
-        # close file handles which are not required in child
         $0 = "ruby #{worker_klass.worker_name}"
         master_write_end.close
         master_read_end.close
         master_write_fd.close
         # master_write_end.close if master_write_end
-        worker_klass.start_worker(:write_end => worker_write_end,:read_end => worker_read_end,:read_fd => worker_read_fd)
+        worker_klass.start_worker(:write_end => worker_write_end,:read_end => worker_read_end,:read_fd => worker_read_fd,:options => worker_options)
       end
       Process.detach(pid)
-      # if no pimp exists for the given class then we should create a pimp class for the worker
-      # meta programmatically.
+
       unless worker_pimp.blank?
         require worker_pimp
         pimp_klass = Object.const_get(worker_pimp.classify)
