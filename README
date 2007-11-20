@@ -71,7 +71,7 @@ end
 
   When, you are writing a scalable networking application using Event Model of network programming,
   sometimes when processing of certain events take time, your event loop is stuck there. With green
-  threads, you don't really have a way of parallelizing your request processing. Packet library, allows
+  threads, you don't really have a way of paralleling your request processing. Packet library, allows
   you to write simple workers, for executing long running tasks. You can pass data and callbacks as an
   argument.
 
@@ -118,7 +118,7 @@ end
 
   Packet provides various ways of interacting with workers. Usually, when a worker is instantiated, a proxy for
   that worker will also be instantiated at master process. Packet automatically provides a worker proxy(See meta_pimp.rb)
-  for you, but  if you need to multiplex/demultiplex requests based on certain critirea, you may as well define your 
+  for you, but  if you need to multiplex/demultiplex requests based on certain criteria, you may as well define your 
   own worker proxies. Code, would like something like this:
 
     class FooWorker < Packet::Worker
