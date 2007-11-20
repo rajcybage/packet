@@ -1,6 +1,4 @@
-require "rubygems"
 require "socket"
-require "base64"
 require "yaml"
 require "forwardable"
 require "attribute_accessors"
@@ -27,13 +25,12 @@ require "core"
 require "packet_master"
 require "connection"
 require "worker"
-#require "cpu_worker"
 
 # This file is just a runner of things and hence does basic initialization of thingies required for running
 # the application.
 
 
-PACKET_APP=File.expand_path'../' unless defined?(PACKET_APP)
+PACKET_APP = File.expand_path'../' unless defined?(PACKET_APP)
 
 module Packet
   VERSION='0.1.0'

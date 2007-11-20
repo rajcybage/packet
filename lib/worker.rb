@@ -4,7 +4,8 @@ module Packet
     include Core
     iattr_accessor :fd_reader,:msg_writer,:msg_reader,:worker_name
     iattr_accessor :worker_proxy
-    attr_accessor :worker_started
+    iattr_accessor :no_auto_load
+    attr_accessor :worker_started, :worker_options
     after_connection :provide_workers
 
     # method initializes the eventloop for the worker
@@ -14,6 +15,7 @@ module Packet
       @msg_reader = messengers[:read_end]
       @fd_reader = messengers[:read_fd]
       t_instance = new
+      t_instance.worker_options = messengers[:options]
       t_instance.worker_init if t_instance.respond_to?(:worker_init)
       t_instance.start_reactor
     end
@@ -35,7 +37,7 @@ module Packet
         callback_hash[t_callback.signature] = t_callback
         send_data(:data => t_data,:function => options[:function],:callback_signature => t_callback.signature)
       else
-        send_data(:data => t_data,:function => options[:function])
+        send_data(:data => t_data,:function => options[:function],:requested_worker => options[:worker],:requesting_worker => worker_name,:type => :request)
       end
     end
 
