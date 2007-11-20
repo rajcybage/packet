@@ -168,7 +168,7 @@ module Packet
           t_data = read_data(t_sock)
           handler_instance.receive_data(t_data) if handler_instance.respond_to?(:receive_data)
         rescue DisconnectError => sock_error
-          handler_instance.unbind
+          handler_instance.unbind if handler_instance.respond_to?(:unbind)
           connections.delete(t_sock.fileno)
           read_ios.delete(t_sock)
         end
