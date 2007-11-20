@@ -66,18 +66,27 @@ end
  Documentation to come.
 
 === Using Workers
-  Packet enables you to write simple workers, which will run in different process and gives you nice 
+  Packet enables you to write simple workers, which will run in 
+  different process and gives you nice 
   evented handle for concurrent execution of various tasks. 
 
-  When, you are writing a scalable networking application using Event Model of network programming,
-  sometimes when processing of certain events take time, your event loop is stuck there. With green
-  threads, you don't really have a way of paralleling your request processing. Packet library, allows
-  you to write simple workers, for executing long running tasks. You can pass data and callbacks as an
+  When, you are writing a scalable networking application 
+  using Event Model of network programming,
+  sometimes when processing of certain events take time, 
+  your event loop is stuck there. With green
+  threads, you don't really have a way of paralleling 
+  your request processing. Packet library, allows
+  you to write simple workers, for executing long 
+  running tasks. You can pass data and callbacks as an
   argument.
 
-  When you are going to use workers in your application, you need to define constant WORKER_ROOT,
-  which is the directory location, where your workers are located. All the workers defined in that directory
-  will be automatically, picked and forked in a new process when your packet app starts. So, a typical
+  When you are going to use workers in
+  your application, you need to define
+  constant WORKER_ROOT,
+  which is the directory location, where
+  your workers are located. All the workers defined in that directory
+  will be automatically, picked and forked in a
+  new process when your packet app starts. So, a typical
   packet_app, that wants to use workers, will look like this:
 
   packet_app_root
@@ -92,7 +101,8 @@ end
 
   You would define WORKER_ROOT = PACKET_APP_ROOT/worker
 
-  All the workers must inherit class Packet::Worker, and hence a general skeleton of worker will look like:
+  All the workers must inherit class Packet::Worker, and hence a 
+  general skeleton of worker will look like:
 
     class FooWorker < Packet::Worker
       set_worker_name :foo_worker #=> This is necessary.
@@ -109,31 +119,46 @@ end
       end
     end
 
-  All the forked workers are connected to master via UNIX sockets, and hence messages passed to workers from master
-  will be available in receive_data method. Also, when you are passing messages to workers, or worker is passing 
-  message to master ( in a nutshell, all the internal communication between workers and master ) directly takes
-  place using ruby objects. All the passed ruby objects are dumped and marshalled across unix sockets in a non blocking 
-  manner. BinParser class parses dumped binary objects and makes sure, packets received at other end are complete.
+  All the forked workers are connected to master via
+  UNIX sockets, and hence messages passed to workers from master
+  will be available in receive_data method. Also,
+  when you are passing messages to workers, or worker is passing 
+  message to master ( in a nutshell, all the internal
+  communication between workers and master ) directly takes
+  place using ruby objects. All the passed ruby objects are
+  dumped and marshalled across unix sockets in a non blocking 
+  manner. BinParser class parses dumped binary objects and
+  makes sure, packets received at other end are complete.
   Usually, you wouldn't need to worry about this little detail.
 
-  Packet provides various ways of interacting with workers. Usually, when a worker is instantiated, a proxy for
-  that worker will also be instantiated at master process. Packet automatically provides a worker proxy(See meta_pimp.rb)
-  for you, but  if you need to multiplex/demultiplex requests based on certain criteria, you may as well define your 
+  Packet provides various ways of interacting with
+  workers. Usually, when a worker is instantiated, a proxy for
+  that worker will also be instantiated at master
+  process. Packet automatically provides a worker proxy(See meta_pimp.rb)
+  for you, but  if you need to multiplex/demultiplex
+  requests based on certain criteria, you may as well define your 
   own worker proxies. Code, would like something like this:
 
     class FooWorker < Packet::Worker
       set_worker_proxy :foo_handler
     end
 
-  When you define, :foo_handler as a proxy for this worker, packet is gonna search for FooHandler class and instantiate it
-  when the worker gets started. All the worker proxies must inherit from Packet::Pimp. Have a look at, Packet::MetaPimp,
-  which acts as a meta pimp for all the workers, which don't have a explicit worker proxy defined.
+  When you define, :foo_handler as a proxy for
+  this worker, packet is gonna search for FooHandler class and 
+  instantiate it when the worker gets started. All 
+  the worker proxies must inherit from Packet::Pimp. 
+  Have a look at, Packet::MetaPimp,
+  which acts as a meta pimp for all the workers,
+  which don't have a explicit worker proxy defined.
 
 === A complete Case :
 
-    Just for kicks, lets write a sample server, which evals whatever clients send to it. But, assuming this 'eval' of 
-    client data can be potentially time/cpu consuming ( not to mention dangerous too ), we are gonna ask our eval_worker, to
-    perform eval and return the result to master process, which in turn returns the result to happy client.
+    Just for kicks, lets write a sample server,
+    which evals whatever clients send to it. But, assuming this 'eval' of 
+    client data can be potentially time/cpu
+    consuming ( not to mention dangerous too ), we are gonna ask our eval_worker, to
+    perform eval and return the result to master process, which in 
+    turn returns the result to happy client.
 
     # APP_ROOT/bin/eval_server.rb
     EVAL_APP_ROOT = File.expand_path(File.join(File.dirname(__FILE__) + "/.."))
@@ -194,23 +219,27 @@ end
    end
 
 === Passing file descriptors to workers :
-  Lots of web servers, are written using the pattern, in which a client connects to the master
-  and master passes file descriptor of client to a child and closes its end of file descriptor. This
-  way, child handles all the things related to that client. Packet, allows this style of load
-  distribution as well, you can use method send_fd to pass file descriptors to workers. 
+  Packet, allows this style of load
+  distribution as well, you can use method send_fd to
+  pass file descriptors to workers. 
   WARNING: This feature hasn't been tested well.
 
 === Disable auto loading of certain workers:
-  Sometimes, you would need to start a worker at runtime and don't want this pre-forking mechanism.
-  Packet, allows this. You just need to define "set_no_auto_load true" in your worker class and worker
+  Sometimes, you would need to start a
+  worker at runtime and don't want this pre-forking mechanism.
+  Packet, allows this. You just need to define
+  "set_no_auto_load true" in your worker class and worker
   will not be automatically forked. Although name is a bit misleading perhaps.
 
-  Now, at runtime, you can call start_worker(:foo_worker, options) to start a worker as usual. It should
-  be noted that, forking a worker, which is already forked can be disastrous, since worker names are being
+  Now, at runtime, you can call start_worker(:foo_worker, options)
+  to start a worker as usual. It should
+  be noted that, forking a worker, which is already
+  forked can be disastrous, since worker names are being
   used as unique keys that represent a worker.
 
 == Performance:
-  Although written in pure ruby, packet performs reasonably well. Mongrel, running on top of Packet is a tad
+  Although written in pure ruby, packet performs
+  reasonably well. Mongrel, running on top of Packet is a tad
   slower than Mongrel running on top of EventMachine. More benchmarks coming soon.
 
 == Credits
