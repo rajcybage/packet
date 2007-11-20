@@ -242,6 +242,10 @@ end
   reasonably well. Mongrel, running on top of Packet is a tad
   slower than Mongrel running on top of EventMachine. More benchmarks coming soon.
 
+== SVN repo:
+   Code for packet is on google code, svn repo is:
+   http://packet.googlecode.com/svn/trunk/
+
 == Credits
   Francis for awesome EventMachine lib, which has constantly acted as an inspiration.
   Ezra, for being a early user and porting mongrel to run on top of packet      
