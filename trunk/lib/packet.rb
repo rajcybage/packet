@@ -6,8 +6,6 @@ require "buftok"
 require "bin_parser"
 
 require "ostruct"
-require "socket"
-
 require "packet_guid"
 require "ruby_hacks"
 require "double_keyed_hash"
