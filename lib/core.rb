@@ -231,7 +231,7 @@ module Packet
         t_signature = Guid.hexdigest
         handler_instance.signature = t_signature
         connections[t_socket.fileno] =
-          OpenStruct.new( :socket => t_socket, :instance => handler_instance, :signature => t_signature,:sock_addr => sock_addr)
+          OpenStruct.new(:socket => t_socket, :instance => handler_instance, :signature => t_signature,:sock_addr => sock_addr)
         block.call(handler_instance) if block
         handler_instance.connection_completed if handler_instance.respond_to?(:connection_completed)
       end

@@ -5,29 +5,6 @@ class Object
     Marshal.load(Marshal.dump(self))
   end
 
-  def nothing?
-    if respond_to?(:empty?) && respond_to?(:strip)
-      empty? or strip.empty?
-    elsif respond_to?(:empty?)
-      empty?
-    elsif respond_to?(:zero?)
-      zero?
-    else
-      !self
-    end
-  end
-
-  def clean!
-    if respond_to?(:empty?) && respond_to?(:strip)
-      return nil if empty?
-      (strip.empty?) ? nil : (self.strip)
-    elsif respond_to?(:empty?)
-      empty? ? nil : self
-    else
-      self
-    end
-  end
-
   def blank?
     if respond_to?(:empty?) && respond_to?(:strip)
       empty? or strip.empty?
@@ -85,31 +62,15 @@ end
 
 class Array #:nodoc:
   alias_method :blank?, :empty?
-  def clean!
-    (empty?) ? nil : self
-  end
-
-  def extract_options!
-    last.is_a?(Hash) ? pop : {}
-  end
 end
 
 class Hash #:nodoc:
   alias_method :blank?, :empty?
-  def clean!
-    (empty?) ? nil : self
-  end
 end
 
 class String #:nodoc:
   def blank?
     empty? || strip.empty?
-  end
-
-  def clean!
-    return nil if empty?
-    t_val = self.strip
-    (t_val.empty?) ? nil : t_val
   end
 
   def classify

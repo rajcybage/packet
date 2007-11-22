@@ -110,6 +110,7 @@ module Packet
     end
 
     # method forks given worker file in a new process
+    # method should use job_key if provided in options hash.
     def fork_and_load(worker_klass,worker_options = { })
       t_worker_name = worker_klass.worker_name
       worker_pimp = worker_klass.worker_proxy.to_s
