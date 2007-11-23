@@ -2,7 +2,6 @@ require "socket"
 require "yaml"
 require "forwardable"
 require "attribute_accessors"
-require "buftok"
 require "bin_parser"
 
 require "ostruct"
