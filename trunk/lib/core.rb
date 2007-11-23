@@ -29,12 +29,6 @@ module Packet
         connection_callbacks[:before_unbind] ||= []
         connection_callbacks[:before_unbind] << p_method
       end
-
-      def packet_classify(original_string)
-        word_parts = original_string.split('_')
-        return word_parts.map { |x| x.capitalize}.join
-      end
-
     end # end of module#ClassMethods
 
     module CommonMethods
@@ -228,11 +222,6 @@ module Packet
             Class.new(Connection) { p_module and include p_module }
           end
         return handler.new
-      end
-
-      def packet_classify(original_string)
-        word_parts = original_string.split('_')
-        return word_parts.map { |x| x.capitalize}.join
       end
 
 

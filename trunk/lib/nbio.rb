@@ -26,18 +26,6 @@ module Packet
       rescue Errno::EAGAIN
         return
       end
-
-#       loop do
-#         begin
-#           written_length = p_sock.write_nonblock(t_data)
-#         rescue Errno::EAGAIN
-#           break
-#         end
-#         break if written_length >= t_length
-#         t_data = t_data[written_length..-1]
-#         break if t_data.empty?
-#         t_length = t_data.length
-#       end
     end
 
     # method writes data to socket in a non blocking manner, but doesn't care if there is a error writing data
@@ -78,4 +66,11 @@ module Packet
     end
 
   end
+
+  def packet_classify(original_string)
+    word_parts = original_string.split('_')
+    return word_parts.map { |x| x.capitalize}.join
+  end
+
+
 end

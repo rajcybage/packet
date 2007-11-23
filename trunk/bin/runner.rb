@@ -25,13 +25,11 @@ class Foo
   end
 
   def wow
-    puts "Wow"
+    #puts "Wow"
   end
 end
 
 Packet::Reactor.run do |t_reactor|
-  t_reactor.start_server("localhost", 11006,Foo) do |instance|
-    instance.wow
-  end
+  t_reactor.start_server("0.0.0.0", 11006,Foo)
 end
 
