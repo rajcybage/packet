@@ -87,11 +87,11 @@ module Packet
         worker_root = "#{PACKET_APP}/worker"
       end
       t_workers = Dir["#{worker_root}/**/*.rb"]
-      return if t_workers.blank?
+      return if t_workers.empty?
       t_workers.each do |b_worker|
         worker_name = File.basename(b_worker,".rb")
         require worker_name
-        worker_klass = Object.const_get(worker_name.classify)
+        worker_klass = Object.const_get(packet_classify(worker_name))
         next if worker_klass.no_auto_load
         fork_and_load(worker_klass)
       end
@@ -105,7 +105,7 @@ module Packet
 
     def start_worker(worker_name,options = {})
       require worker_name.to_s
-      worker_klass = Object.const_get(worker_name.classify)
+      worker_klass = Object.const_get(packet_classify(worker_name))
       fork_and_load(worker_klass,options)
     end
 
@@ -131,9 +131,9 @@ module Packet
       end
       Process.detach(pid)
 
-      unless worker_pimp.blank?
+      if worker_pimp && !worker_pimp.empty?
         require worker_pimp
-        pimp_klass = Object.const_get(worker_pimp.classify)
+        pimp_klass = Object.const_get(packet_classify(worker_pimp))
         @live_workers[t_worker_name,master_read_end.fileno] = pimp_klass.new(master_write_end,pid,self)
       else
         @live_workers[t_worker_name,master_read_end.fileno] = Packet::MetaPimp.new(master_write_end,pid,self)
