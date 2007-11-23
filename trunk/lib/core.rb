@@ -29,6 +29,12 @@ module Packet
         connection_callbacks[:before_unbind] ||= []
         connection_callbacks[:before_unbind] << p_method
       end
+
+      def packet_classify(original_string)
+        word_parts = original_string.split('_')
+        return word_parts.map { |x| x.capitalize}.join
+      end
+
     end # end of module#ClassMethods
 
     module CommonMethods
@@ -127,7 +133,10 @@ module Packet
         loop do
           check_for_timer_events
           ready_fds = select(@read_ios,@write_ios,nil,0.005)
-          next if ready_fds.blank?
+          #next if ready_fds.blank?
+
+          next if !ready_fds or ready_fds.empty?
+
           ready_fds = ready_fds.flatten.compact
           ready_fds.each do |t_sock|
             if t_sock.is_a? UNIXSocket
@@ -219,6 +228,12 @@ module Packet
           end
         return handler.new
       end
+
+      def packet_classify(original_string)
+        word_parts = original_string.split('_')
+        return word_parts.map { |x| x.capitalize}.join
+      end
+
 
       def decorate_handler(t_socket,actually_connected,sock_addr,t_module,&block)
         handler_instance = initialize_handler(t_module)

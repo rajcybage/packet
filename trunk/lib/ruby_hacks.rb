@@ -1,24 +1,7 @@
-# FIXME: ultimate goal should be remove dependence from activesupport gem altogether.
-
 class Object
-  def deep_copy
-    Marshal.load(Marshal.dump(self))
-  end
-
-  def blank?
-    if respond_to?(:empty?) && respond_to?(:strip)
-      empty? or strip.empty?
-    elsif respond_to?(:empty?)
-      empty?
-    else
-      !self
-    end
-  end
-
   def self.metaclass; class << self; self; end; end
 
   def self.iattr_accessor *args
-
     metaclass.instance_eval do
       attr_accessor *args
       args.each do |attr|
@@ -42,45 +25,3 @@ class Object
 end
 
 
-class NilClass #:nodoc:
-  def blank?
-    true
-  end
-end
-
-class FalseClass #:nodoc:
-  def blank?
-    true
-  end
-end
-
-class TrueClass #:nodoc:
-  def blank?
-    false
-  end
-end
-
-class Array #:nodoc:
-  alias_method :blank?, :empty?
-end
-
-class Hash #:nodoc:
-  alias_method :blank?, :empty?
-end
-
-class String #:nodoc:
-  def blank?
-    empty? || strip.empty?
-  end
-
-  def classify
-    word_parts = split('_')
-    return word_parts.map { |x| x.capitalize}.join
-  end
-end
-
-class Numeric #:nodoc:
-  def blank?
-    false
-  end
-end
