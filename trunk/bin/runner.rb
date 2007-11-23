@@ -6,7 +6,7 @@ EVAL_APP_ROOT = File.expand_path(File.join(File.dirname(__FILE__) + "/.."))
 require "packet"
 class Foo
   def receive_data p_data
-    p p_data
+    send_data(p_data)
     #ask_worker(:no_proxy_worker,:data => p_data, :type => :request)
   end
 
