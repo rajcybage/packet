@@ -2,6 +2,7 @@ module Packet
   module NbioHelper
     # nonblocking method of reading data
     # when method returns nil it probably means that client diconnected
+
     def read_data(t_sock)
       sock_data = ""
       begin

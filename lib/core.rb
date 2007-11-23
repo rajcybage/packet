@@ -185,6 +185,7 @@ module Packet
 
       def add_timer(elapsed_time,&block)
         t_timer = Event.new(elapsed_time,&block)
+        # @timer_hash.store(timer)
         @timer_hash[t_timer.timer_signature] = t_timer
         return t_timer
       end
@@ -200,6 +201,7 @@ module Packet
         @connections ||= {}
         @listen_sockets ||= {}
 
+        # @timer_hash = Packet::TimerStore
         @timer_hash ||= {}
       end
 
@@ -211,6 +213,10 @@ module Packet
             @timer_hash.delete(key) if !timer.respond_to?(:interval)
           end
         end
+
+#         @timer_hash.each do |timer|
+#           timer.run
+#         end
       end
 
       def initialize_handler(p_module)
