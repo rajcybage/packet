@@ -48,12 +48,12 @@ spec = Gem::Specification.new do |s|
   s.extra_rdoc_files = ["README", "LICENSE", 'TODO']
   #s.rdoc_options += RDOC_OPTS +
   #  ['--exclude', '^(app|uploads)']
-  s.summary = "Packet, Events... we got em."
+  s.summary = "Packet, A Pure Ruby library for Event Driven Network Programming."
   s.description = s.summary
-  s.author = "Hemant"
-  s.email = 'foo@bar.com'
+  s.author = "Hemant Kumar"
+  s.email = 'mail@gnufied.org'
   s.homepage = 'http://code.google.com/p/packet/'
-  s.required_ruby_version = '>= 1.8.4'
+  s.required_ruby_version = '>= 1.8.5'
 
   s.files = %w(LICENSE README Rakefile TODO) + Dir.glob("{bin,spec,lib,examples,script}/**/*")
 
