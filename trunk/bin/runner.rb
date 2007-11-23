@@ -19,6 +19,7 @@ class Foo
   end
 
   def connection_completed
+    add_periodic_timer(4) { send_data("hello\n")}
   end
 
   def post_init
