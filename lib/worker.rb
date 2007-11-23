@@ -5,6 +5,7 @@ module Packet
     iattr_accessor :fd_reader,:msg_writer,:msg_reader,:worker_name
     iattr_accessor :worker_proxy
     iattr_accessor :no_auto_load
+
     attr_accessor :worker_started, :worker_options
     after_connection :provide_workers
 
