@@ -211,6 +211,7 @@ module Packet
 
       def check_for_timer_events
         @timer_hash.each do |key,timer|
+          @timer_hash.delete(key) if timer.cancel_flag
           if timer.run_now?
             timer.run
             @timer_hash.delete(key) if !timer.respond_to?(:interval)

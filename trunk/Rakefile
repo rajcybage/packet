@@ -6,6 +6,7 @@ require 'rake/rdoctask'
 require 'rake/testtask'
 require 'spec/rake/spectask'
 require 'fileutils'
+
 def __DIR__
   File.dirname(__FILE__)
 end
@@ -85,3 +86,11 @@ task :svn_add do
 end
 
 
+desc "Converts a YAML file into a test/spec skeleton"
+task :yaml_to_spec do
+  require 'yaml'
+
+  puts YAML.load_file(ENV['FILE']||!puts("Pass in FILE argument.")&&exit).inject(''){|t,(c,s)|
+    t+(s ?%.context "#{c}" do.+s.map{|d|%.\n  xspecify "#{d}" do\n  end\n.}*''+"end\n\n":'')
+  }.strip
+end
