@@ -1,7 +1,9 @@
 module Packet
   module NbioHelper
-    # nonblocking method of reading data
-    # when method returns nil it probably means that client diconnected
+    def packet_classify(original_string)
+      word_parts = original_string.split('_')
+      return word_parts.map { |x| x.capitalize}.join
+    end
 
     def read_data(t_sock)
       sock_data = ""
@@ -65,13 +67,5 @@ module Packet
         return
       end
     end
-
   end
-
-  def packet_classify(original_string)
-    word_parts = original_string.split('_')
-    return word_parts.map { |x| x.capitalize}.join
-  end
-
-
 end
