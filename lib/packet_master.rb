@@ -21,6 +21,7 @@ module Packet
         extend Forwardable
         attr_accessor :workers,:connection,:reactor, :initialized,:signature
         include NbioHelper
+
         def send_data p_data
           begin
             write_data(p_data,connection)
@@ -28,6 +29,7 @@ module Packet
             # probably a callback, when there is a error in writing to the socket
           end
         end
+
         def invoke_init
           @initialized = true
           post_init
@@ -54,7 +56,9 @@ module Packet
         def send_object p_object
           dump_object(p_object,connection)
         end
-        def_delegators :@reactor, :start_server, :connect, :add_periodic_timer, :add_timer, :cancel_timer,:reconnect, :start_worker
+        def_delegators(:@reactor, :start_server, :connect, :add_periodic_timer, \
+                         :add_timer, :cancel_timer,:reconnect, :start_worker)
+
       end
       handler_instance.workers = @live_workers
       handler_instance.connection = t_sock
@@ -127,7 +131,8 @@ module Packet
         master_read_end.close
         master_write_fd.close
         # master_write_end.close if master_write_end
-        worker_klass.start_worker(:write_end => worker_write_end,:read_end => worker_read_end,:read_fd => worker_read_fd,:options => worker_options)
+        worker_klass.start_worker(:write_end => worker_write_end,:read_end => worker_read_end,\
+                                  :read_fd => worker_read_fd,:options => worker_options)
       end
       Process.detach(pid)
 

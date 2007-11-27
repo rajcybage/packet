@@ -7,7 +7,9 @@ require "packet"
 class Foo
   def receive_data p_data
     #send_data(p_data)
-    ask_worker(:no_proxy_worker,:data => p_data, :type => :request)
+    data_callback = Packet::Callback.new { |data| show_result(data) }
+    workers[:no_proxy_worker].send_request(:data => p_data,:callback => data_callback)
+    # ask_worker(:no_proxy_worker,:data => p_data, :type => :request)
   end
 
   def worker_receive p_data
@@ -15,11 +17,11 @@ class Foo
   end
 
   def show_result p_data
-    send_data("#{p_data[:response]}\n")
+    send_data("#{p_data[:data]}\n")
   end
 
   def connection_completed
-    add_periodic_timer(4) { send_data("hello\n")}
+    #add_periodic_timer(4) { send_data("hello\n")}
   end
 
   def post_init
