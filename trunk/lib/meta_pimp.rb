@@ -12,8 +12,6 @@ class Packet::MetaPimp < Packet::Pimp
   end
 
   # will be invoked whenever there is a response from the worker
-  # Possible bug with reading large responses.
-  # response would be binary but base64 encoded and must be decoded and then loaded
   def receive_data p_data
     @tokenizer.extract(p_data) do |b_data|
       t_data = Marshal.load(b_data)
@@ -45,7 +43,7 @@ class Packet::MetaPimp < Packet::Pimp
   def process_response(data_options = {})
     if callback_signature = data_options[:callback_signature]
       callback = callback_hash[callback_signature]
-      callback.call(data_options)
+      callback.invoke(data_options)
     elsif client_signature = data_options[:client_signature]
       reactor.connections[client_signature].instance.worker_receive(data_options)
     end

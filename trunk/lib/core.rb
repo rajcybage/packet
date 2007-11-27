@@ -87,7 +87,8 @@ module Packet
 
         read_ios << t_sock if actually_connected
         write_ios.delete(t_sock)
-        decorate_handler(t_sock,actually_connected,sock_opts[:sock_addr],sock_opts[:module],&sock_opts[:block])
+        decorate_handler(t_sock,actually_connected,sock_opts[:sock_addr],\
+                           sock_opts[:module],&sock_opts[:block])
         connection_completion_awaited.delete(t_sock.fileno)
       end
 
@@ -143,10 +144,12 @@ module Packet
       end
 
       def terminate_me
+        # FIXME: close the open sockets
         exit
       end
 
       def shutdown
+        # FIXME: close the open sockets
         exit
       end
 
