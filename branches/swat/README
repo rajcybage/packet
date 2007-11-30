@@ -1,0 +1,12 @@
+Swat is a todo list manager for Gnome & Emacs.
+
+Heck : Emacs?
+
+Yeah : In fact, swat just displays your tasks in red, blue and green. But you can't edit your tasks
+     in swat. For editing your tasks, you must fire your faithful Emacs and use org mode for editing
+     tasks.
+
+Swat : View tasks, view tasks by priority, sync using svn and ftp and all that sick things. 
+     Press Ctrl-Ctrl twice, to see the list.
+
+
