@@ -23,6 +23,13 @@ class TodoWindow
     end
   end
 
+  def on_reload_button_clicked
+    read_org_file
+    @model = create_model
+    load_available_lists
+    @todo_view.expand_all
+  end
+
   def initialize path
     @glade = GladeXML.new(path) { |handler| method(handler) }
     @todo_view = @glade.get_widget("todo_view")

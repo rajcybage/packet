@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.0 on Fri Nov 30 13:08:49 2007 -->
+<!--Generated with glade3 3.4.0 on Fri Nov 30 14:31:43 2007 -->
 <glade-interface>
   <widget class="GtkWindow" id="todo_window">
     <property name="visible">True</property>
@@ -21,25 +21,40 @@
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
             <child>
               <widget class="GtkButton" id="checkin_button">
-                <property name="width_request">163</property>
-                <property name="height_request">5</property>
+                <property name="width_request">35</property>
+                <property name="height_request">28</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="label" translatable="yes">gtk-refresh</property>
-                <property name="use_stock">True</property>
+                <property name="label" translatable="yes">_Checkin</property>
+                <property name="use_underline">True</property>
                 <property name="response_id">0</property>
                 <signal name="clicked" handler="on_checkin_button_clicked"/>
               </widget>
             </child>
             <child>
-              <placeholder/>
+              <widget class="GtkButton" id="reload_button">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="label" translatable="yes">_Reload</property>
+                <property name="use_underline">True</property>
+                <property name="response_id">0</property>
+                <signal name="clicked" handler="on_reload_button_clicked"/>
+              </widget>
+              <packing>
+                <property name="position">1</property>
+              </packing>
             </child>
             <child>
               <placeholder/>
             </child>
           </widget>
+          <packing>
+            <property name="expand">False</property>
+          </packing>
         </child>
         <child>
           <widget class="GtkTreeView" id="todo_view">
