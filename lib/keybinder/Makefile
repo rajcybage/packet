@@ -42,7 +42,7 @@ LIBRUBYARG_STATIC = -l$(RUBY_SO_NAME)-static
 
 RUBY_EXTCONF_H = 
 CFLAGS   =  -fPIC -fno-strict-aliasing -g -O2  -fPIC 
-INCFLAGS = -I. -I$(topdir) -I$(hdrdir) -I$(srcdir) -I/usr/include/libgnomeprint-2.2 -I/usr/include/libart-2.0 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/libxml2 -I/usr/include/pango-1.0 -I/usr/include/libgnomeprintui-2.2 -I/usr/include/libgnomecanvas-2.0 -I/usr/include/freetype2 -I/usr/include/gail-1.0 -I/usr/include/gtk-2.0 -I/usr/include/atk-1.0 -I/usr/lib/gtk-2.0/include -I/usr/include/cairo -I/usr/include/libpng12  
+INCFLAGS = -I. -I$(topdir) -I$(hdrdir) -I$(srcdir) -I/usr/include/libgnomeprint-2.2 -I/usr/include/libart-2.0 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/libxml2 -I/usr/include/pango-1.0 -I/usr/include/libgnomeprintui-2.2 -I/usr/include/libgnomecanvas-2.0 -I/usr/include/freetype2 -I/usr/include/gail-1.0 -I/usr/include/gtk-2.0 -I/usr/include/atk-1.0 -I/usr/lib/gtk-2.0/include -I/usr/include/cairo -I/usr/include/libpng12 
 CPPFLAGS =  
 CXXFLAGS = $(CFLAGS) 
 DLDFLAGS = -L.  -rdynamic -Wl,-export-dynamic  
