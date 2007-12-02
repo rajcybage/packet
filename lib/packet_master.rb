@@ -8,6 +8,10 @@ module Packet
     attr_accessor :live_workers
     after_connection :provide_workers
 
+    def self.server_logger= (log_file_name)
+      @@server_logger = log_file_name
+    end
+
     def self.run
       master_reactor_instance = new
       master_reactor_instance.live_workers = DoubleKeyedHash.new
@@ -49,8 +53,9 @@ module Packet
         def ask_worker(*args)
           worker_name = args.shift
           data_options = *args
+          worker_name_key = gen_worker_key(worker_name,data_options[:job_key])
           data_options[:client_signature] = connection.fileno
-          workers[worker_name].send_request(data_options)
+          workers[worker_name_key].send_request(data_options)
         end
 
         def send_object p_object
@@ -107,10 +112,12 @@ module Packet
       end
     end
 
-    def start_worker(worker_name,options = {})
-      require worker_name.to_s
+    def start_worker(worker_options = { })
+      worker_name = worker_options[:worker].to_s
+      worker_options.delete(:worker)
+      require worker_name
       worker_klass = Object.const_get(packet_classify(worker_name))
-      fork_and_load(worker_klass,options)
+      fork_and_load(worker_klass,worker_options)
     end
 
     # method forks given worker file in a new process
@@ -127,21 +134,26 @@ module Packet
 
       if((pid = fork()).nil?)
         $0 = "ruby #{worker_klass.worker_name}"
-        master_write_end.close
-        master_read_end.close
-        master_write_fd.close
-        # master_write_end.close if master_write_end
+        [master_write_end,master_read_end,master_write_fd].each { |x| x.close }
+
+        if(defined?(@@server_logger) && @@server_logger && !@@server_logger.empty?)
+          log_file = File.open(@@server_logger,"w+")
+          [STDIN, STDOUT, STDERR].each {|desc| desc.reopen(log_file)}
+        end
+
         worker_klass.start_worker(:write_end => worker_write_end,:read_end => worker_read_end,\
                                   :read_fd => worker_read_fd,:options => worker_options)
       end
       Process.detach(pid)
 
+      worker_name_key = gen_worker_key(t_worker_name,worker_options[:job_key])
+
       if worker_pimp && !worker_pimp.empty?
         require worker_pimp
         pimp_klass = Object.const_get(packet_classify(worker_pimp))
-        @live_workers[t_worker_name,master_read_end.fileno] = pimp_klass.new(master_write_end,pid,self)
+        @live_workers[worker_name_key,master_read_end.fileno] = pimp_klass.new(master_write_end,pid,self)
       else
-        @live_workers[t_worker_name,master_read_end.fileno] = Packet::MetaPimp.new(master_write_end,pid,self)
+        @live_workers[worker_name_key,master_read_end.fileno] = Packet::MetaPimp.new(master_write_end,pid,self)
       end
 
       worker_read_end.close
@@ -149,6 +161,5 @@ module Packet
       worker_read_fd.close
       read_ios << master_read_end
     end # end of fork_and_load method
-
   end # end of Reactor class
 end # end of Packet module
