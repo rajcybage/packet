@@ -8,6 +8,7 @@ class Packet::MetaPimp < Packet::Pimp
   def pimp_init
     @callback_hash ||= {}
     @worker_status = nil
+    @worker_result = nil
     @tokenizer = BinParser.new
   end
 
@@ -27,7 +28,13 @@ class Packet::MetaPimp < Packet::Pimp
       process_response(data_options)
     when :status
       save_worker_status(data_options)
+    when :result
+      save_worker_result(data_options)
     end
+  end
+
+  def save_worker_result(data_options = { })
+    @worker_result = data_options[:data]
   end
 
   def save_worker_status(data_options = { })
