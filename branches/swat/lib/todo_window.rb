@@ -23,7 +23,7 @@ class TodoWindow
   # create a new dialog button for adding a todo, add that to the org file
   # update the disply.
   def on_add_todo_button_clicked
-
+    puts "Someone clicked add button"
   end
 
   def on_todo_window_key_press_event(widget,key)
