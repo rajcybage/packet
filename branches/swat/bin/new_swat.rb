@@ -16,7 +16,7 @@ class Swat
 
   def initialize
     @status_icon = Gtk::StatusIcon.new
-    TodoWindow.todo_file_location = File.join(ENV['HOME'], 'notes/todo.org')
+    TodoWindow.todo_file_location = File.join(ENV['HOME'], 'snippets/todo.org')
     @todo_window = TodoWindow.new("#{SWAT_APP}/resources/todo_window.glade")
 
     @status_icon.set_icon_name(Gtk::Stock::DIALOG_INFO)
