@@ -24,6 +24,9 @@ class TodoWindow
   end
 
   def on_reload_button_clicked
+    # FIXME: perhaps this synchronization with SVN should be made optional.
+    # since automatically checkin in files could be a source of irritation
+    # system("svn up #{@@todo_file_location}")
     read_org_file
     @model = create_model
     load_available_lists
