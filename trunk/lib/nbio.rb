@@ -33,6 +33,8 @@ module Packet
         p_sock.write_nonblock(t_data)
       rescue Errno::EAGAIN
         return
+      rescue Errno::EPIPE
+        raise DisconnectError.new(p_sock)
       end
     end
 
@@ -43,6 +45,8 @@ module Packet
         p_sock.write_nonblock(t_data)
       rescue Errno::EAGAIN
         return
+      rescue Errno::EPIPE
+        raise DisconnectError.new(p_sock)
       end
     end
 
@@ -53,23 +57,12 @@ module Packet
       length_str = dump_length.rjust(9,'0')
       final_data = length_str + object_dump
 
-#       total_length = final_data.length
-#       loop do
-#         begin
-#           written_length = p_sock.write_nonblock(final_data)
-#         rescue Errno::EAGAIN
-#           break
-#         end
-#         break if written_length >= total_length
-#         final_data = final_data[written_length..-1]
-#         break if final_data.empty?
-#         total_length = final_data.length
-#       end
-
       begin
         p_sock.write_nonblock(final_data)
       rescue Errno::EAGAIN
         return
+      rescue Errno::EPIPE
+        raise DisconnectError.new(p_sock)
       end
     end
   end

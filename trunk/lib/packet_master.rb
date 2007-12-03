@@ -62,7 +62,7 @@ module Packet
           dump_object(p_object,connection)
         end
         def_delegators(:@reactor, :start_server, :connect, :add_periodic_timer, \
-                         :add_timer, :cancel_timer,:reconnect, :start_worker)
+                         :add_timer, :cancel_timer,:reconnect, :start_worker,:delete_worker)
 
       end
       handler_instance.workers = @live_workers
@@ -84,12 +84,18 @@ module Packet
       end
     end
 
+    def delete_worker(worker_options = {})
+      worker_name = worker_options[:worker]
+      worker_name_key = gen_worker_key(worker_name,worker_options[:job_key])
+      worker_options[:method] = :exit
+      @live_workers[worker_name_key].send_request(worker_options)
+    end
+
     # method loads workers in new processes
     # FIXME: this method can be fixed, so as worker code can be actually, required
     # only in forked process and hence saving upon the memory involved
     # where worker is actually required in master as well as in worker.
     def load_workers
-
       if defined?(WORKER_ROOT)
         worker_root = WORKER_ROOT
       else
@@ -114,6 +120,8 @@ module Packet
 
     def start_worker(worker_options = { })
       worker_name = worker_options[:worker].to_s
+      worker_name_key = gen_worker_key(worker_name,worker_options[:job_key])
+      return if @live_workers[worker_name_key]
       worker_options.delete(:worker)
       require worker_name
       worker_klass = Object.const_get(packet_classify(worker_name))
