@@ -6,7 +6,6 @@
 PACKET_APP = File.expand_path(File.join(File.dirname(__FILE__) + "/.."))
 ["bin","config","parser","worker","framework","lib","pimp"].each { |x| $LOAD_PATH.unshift(PACKET_APP + "/#{x}")}
 require "packet"
-require 'packet'
 
 module Mongrel
   class MongrelProtocol < Packet::Connection
