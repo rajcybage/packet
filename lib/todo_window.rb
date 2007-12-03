@@ -1,7 +1,9 @@
+require "enumerator"
+
 class TodoWindow
   attr_accessor :todo_data,:glade,:todo_window
 
-  TreeItem = Struct.new('TreeItem',:description, :priotiry,:category)
+  TreeItem = Struct.new('TreeItem',:description, :priority,:category)
   @@todo_file_location = nil
 
   def self.todo_file_location= (filename)
@@ -15,6 +17,13 @@ class TodoWindow
 
   def on_todo_window_destroy_event
     return true
+  end
+
+  # add a new todo here
+  # create a new dialog button for adding a todo, add that to the org file
+  # update the disply.
+  def on_add_todo_button_clicked
+
   end
 
   def on_todo_window_key_press_event(widget,key)
@@ -60,11 +69,11 @@ class TodoWindow
 
   def load_available_lists
     @todo_view.model = @model
-    @todo_view.rules_hint = true
+    @todo_view.rules_hint = false
     @todo_view.selection.mode = Gtk::SELECTION_MULTIPLE
   end
 
-  def on_checkin_button_clicked
+  def on_sync_button_clicked
     puts "checking in code now"
     system("svn ci #{@@todo_file_location} -m 'foo'")
   end
@@ -99,7 +108,7 @@ class TodoWindow
   end
 
   def chose_color(todo_item)
-    case todo_item.priotiry
+    case todo_item.priority
       when 1: 'yellow'
       when 0: 'blue'
       when 2: '#E3B8B8'
@@ -123,18 +132,37 @@ class TodoWindow
           @todo_data[category_name] ||= []
           current_category = category_name
         elsif todo_line =~ /TODO/i
-          todo_view_str = todo_line.gsub(/TODO/i,'')
+          todo_view_str = todo_line.gsub(/TODO/,'')
           todo_view_str.gsub!(/\*/,'').strip!
+          todo_view_str = wrap_line(todo_view_str)
           todo_item = TreeItem.new(todo_view_str,get_priority(todo_line),current_category)
           @todo_data[current_category] << todo_item
         end
       end # end of line iterator
     end # end of file open thingy
+    sort_by_priority
   end # end of read_org_file method
 
   def get_priority(main_str)
     stars = $1 if main_str =~ /^(\*+)/
     return stars.size
+  end
+
+  def sort_by_priority
+    @todo_data.each do |key,value|
+      value.sort! { |x,y| x.priority <=> y.priority }
+    end
+    @todo_data.delete_if { |key,value| value.empty? }
+  end
+
+  def wrap_line(line)
+    sep = ' '
+    line_width = 18
+    words = line.split(sep)
+    return words.join(sep) if words.length < line_width
+    new_str = []
+    words.each_slice(line_width) { |x| new_str << x.join(sep)}
+    return new_str.join("\n")
   end
 end
 
