@@ -13,6 +13,11 @@ class DoubleKeyedHash
     @internal_hash[key] || @internal_hash[@keys1[key]]
   end
 
+  def delete(key)
+    @keys1.delete(key)
+    @internal_hash.delete(key)
+  end
+
   def each
     @internal_hash.each { |key,value| yield(key,value)}
   end
