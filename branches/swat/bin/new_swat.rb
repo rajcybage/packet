@@ -16,10 +16,12 @@ class Swat
 
   def initialize
     @status_icon = Gtk::StatusIcon.new
+    icon_file = Gdk::Pixbuf.new("#{SWAT_APP}/resources/gedit-icon.png")
+    @status_icon.pixbuf = icon_file
     TodoWindow.todo_file_location = File.join(ENV['HOME'], 'snippets/todo.org')
+    TodoWindow.meta_data_file = File.open(File.join(ENV['HOME'], 'snippets/meta_data.txt'),"w+")
     @todo_window = TodoWindow.new("#{SWAT_APP}/resources/todo_window.glade")
 
-    @status_icon.set_icon_name(Gtk::Stock::DIALOG_INFO)
     @status_icon.set_tooltip("Your Task List")
     @status_icon.visible = true
     @status_icon.signal_connect('activate') { show_task_list }
