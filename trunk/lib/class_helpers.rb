@@ -61,15 +61,14 @@ module Packet
         end
         " unless options[:instance_writer] == false }
       EOS
-    end
-  end
+     end
+   end
 
-  def cattr_accessor(*syms)
-    cattr_reader(*syms)
-    cattr_writer(*syms)
-  end
-
-  module_function :metaclass,:iattr_accessor, :cattr_writer, :cattr_reader, :cattr_accessor
-end # end of module ClassHelpers
+   def cattr_accessor(*syms)
+     cattr_reader(*syms)
+     cattr_writer(*syms)
+   end
+   module_function :metaclass,:iattr_accessor, :cattr_writer, :cattr_reader, :cattr_accessor
+  end # end of module ClassHelpers
 end
 
