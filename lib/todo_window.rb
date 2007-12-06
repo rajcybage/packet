@@ -5,19 +5,17 @@ class TodoWindow
 
   TreeItem = Struct.new('TreeItem',:description, :priority,:category)
   @@todo_file_location = nil
+  @@meta_data_file = nil
 
-  def self.todo_file_location= (filename)
-    @@todo_file_location = filename
-  end
+  def self.meta_data_file= (file); @@meta_data_file = file; end
+  def self.todo_file_location= (filename); @@todo_file_location = filename; end
 
   def on_todo_window_delete_event
     hide_window
     return true
   end
 
-  def on_todo_window_destroy_event
-    return true
-  end
+  def on_todo_window_destroy_event; return true; end
 
   # add a new todo here
   # create a new dialog button for adding a todo, add that to the org file
@@ -46,7 +44,9 @@ class TodoWindow
     @glade = GladeXML.new(path) { |handler| method(handler) }
     @todo_view = @glade.get_widget("todo_view")
     @todo_window = @glade.get_widget("todo_window")
-
+    window_icon = Gdk::Pixbuf.new("#{SWAT_APP}/resources/gedit-icon.png")
+    @todo_window.icon_list = [window_icon]
+    @todo_window.title = "Your TaskList"
     @todo_selection = @todo_view.selection
     @todo_selection.mode = Gtk::SELECTION_SINGLE
 
@@ -63,9 +63,7 @@ class TodoWindow
     @todo_window.show
   end
 
-  def hide_window
-    @todo_window.hide
-  end
+  def hide_window; @todo_window.hide; end
 
   def load_available_lists
     @todo_view.model = @model
