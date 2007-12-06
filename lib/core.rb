@@ -3,7 +3,7 @@ module Packet
   module Core
     def self.included(base_klass)
       base_klass.extend(ClassMethods)
-      base_klass.instance_eval do
+      base_klass.class_eval do
         # iattr_accessor :connection_callbacks
         @@connection_callbacks ||= {}
         cattr_accessor :connection_callbacks

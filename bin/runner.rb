@@ -1,14 +1,14 @@
 EVAL_APP_ROOT = File.expand_path(File.join(File.dirname(__FILE__) + "/.."))
 ["bin","worker","lib"].each { |x| $LOAD_PATH.unshift(EVAL_APP_ROOT + "/#{x}")}
 
-WORKER_ROOT = EVAL_APP_ROOT + "/worker"
+#WORKER_ROOT = EVAL_APP_ROOT + "/worker"
 
 require "packet"
 class Foo
   def receive_data p_data
-    #send_data(p_data)
-    data_callback = Packet::Callback.new { |data| show_result(data) }
-    workers[:no_proxy_worker].send_request(:data => p_data,:callback => data_callback)
+    send_data(p_data)
+    #data_callback = Packet::Callback.new { |data| show_result(data) }
+    #workers[:no_proxy_worker].send_request(:data => p_data,:callback => data_callback)
     # ask_worker(:no_proxy_worker,:data => p_data, :type => :request)
     # ask_worker(:dynamic_worker,:job_key => :hello_world, :data => p_data, :type => :request)
   end
@@ -23,7 +23,7 @@ class Foo
 
   def connection_completed
     #add_periodic_timer(4) { send_data("hello\n")}
-    start_worker(:worker => :dynamic_worker, :job_key => :hello_world)
+    #start_worker(:worker => :dynamic_worker, :job_key => :hello_world)
   end
 
   def post_init
