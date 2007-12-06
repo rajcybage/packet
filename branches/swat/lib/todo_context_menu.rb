@@ -1,5 +1,5 @@
 class TodoContextMenu
-  def initialize
-
+  def initialize(title = nil)
+    super(title)
   end
 end

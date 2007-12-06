@@ -31,9 +31,6 @@ class TodoWindow
   end
 
   def on_reload_button_clicked
-    # FIXME: perhaps this synchronization with SVN should be made optional.
-    # since automatically checkin in files could be a source of irritation
-    # system("svn up #{@@todo_file_location}")
     read_org_file
     @model = create_model
     load_available_lists
@@ -54,8 +51,35 @@ class TodoWindow
     @model = create_model
     load_available_lists
     add_columns
+    connect_custom_signals
     @todo_view.expand_all
     @todo_window.hide
+  end
+
+  def connect_custom_signals
+    # create an instance of context menu class and let it rot
+    @todo_view.signal_connect("button_press_event") do |widget,event|
+      if event.kind_of? Gdk::EventButton and event.button == 3
+        display_context_menu(widget,event.button)
+      end
+    end
+
+    @todo_view.signal_connect("key-press-event") do |widget,event|
+      if event.kind_of? Gdk::EventKey
+        key_str = Gdk::Keyval.to_name(event.keyval)
+        if key_str =~ /Left/i
+          #fold the block
+        elsif key_str =~ /Right/i
+          #unfold the block
+        end
+      end
+    end
+  end
+
+  def display_context_menu(widget,button)
+    selection = widget.selection
+    if iter = selection.selected
+    end
   end
 
   def show_window
@@ -68,7 +92,7 @@ class TodoWindow
   def load_available_lists
     @todo_view.model = @model
     @todo_view.rules_hint = false
-    @todo_view.selection.mode = Gtk::SELECTION_MULTIPLE
+    @todo_view.selection.mode = Gtk::SELECTION_SINGLE
   end
 
   def on_sync_button_clicked

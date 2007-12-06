@@ -6,6 +6,7 @@ require "yaml"
 SWAT_APP = File.expand_path(File.dirname(__FILE__)+"/..")
 ["lib"].each { |x| $LOAD_PATH.unshift("#{SWAT_APP}/#{x}"); $LOAD_PATH.unshift("#{SWAT_APP}/#{x}/keybinder")}
 
+require "todo_context_menu"
 require "todo_window"
 require "keybinder"
 
