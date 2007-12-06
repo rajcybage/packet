@@ -29,6 +29,7 @@ module Packet
         t_data = p_data.dup.to_s
       end
       t_length = t_data.length
+
       begin
         p_sock.write_nonblock(t_data)
       rescue Errno::EAGAIN

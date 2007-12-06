@@ -4,7 +4,7 @@ threads = []
 500.times do
   threads << Thread.new do
     sock = TCPSocket.open("localhost",11006)
-    10000.times do
+    100.times do
       sock.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1)
       sock.puts("Hello World")
       sock.gets
