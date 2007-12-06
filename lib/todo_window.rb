@@ -25,9 +25,7 @@ class TodoWindow
   end
 
   def on_todo_window_key_press_event(widget,key)
-    if key.keyval == 65307
-      hide_window
-    end
+    hide_window if Gdk::Keyval.to_name(key.keyval) =~ /Escape/i
   end
 
   def on_reload_button_clicked
@@ -58,12 +56,16 @@ class TodoWindow
 
   def connect_custom_signals
     # create an instance of context menu class and let it rot
+    @todo_context_menu = TodoContextMenu.new(" Mark as Done ")
+
     @todo_view.signal_connect("button_press_event") do |widget,event|
       if event.kind_of? Gdk::EventButton and event.button == 3
-        display_context_menu(widget,event.button)
+        @todo_context_menu.todo_menu.popup(nil, nil, event.button, event.time)
       end
     end
+    @todo_view.signal_connect("popup_menu") { @todo_context_menu.todo_menu.popup(nil, nil, 0, Gdk::Event::CURRENT_TIME) }
 
+    # FIXME: implement fold and unfold of blocks
     @todo_view.signal_connect("key-press-event") do |widget,event|
       if event.kind_of? Gdk::EventKey
         key_str = Gdk::Keyval.to_name(event.keyval)
@@ -178,13 +180,13 @@ class TodoWindow
   end
 
   def wrap_line(line)
-    sep = ' '
-    line_width = 18
+    line_width,sep = 18,' '
     words = line.split(sep)
     return words.join(sep) if words.length < line_width
     new_str = []
-    words.each_slice(line_width) { |x| new_str << x.join(sep)}
+    words.each_slice(line_width) { |x| new_str << x.join(sep) }
     return new_str.join("\n")
   end
+
 end
 
