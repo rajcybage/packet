@@ -1,12 +1,12 @@
 require "socket"
 require "yaml"
 require "forwardable"
-require "attribute_accessors"
 require "bin_parser"
 
 require "ostruct"
 require "packet_guid"
-require "ruby_hacks"
+
+require "class_helpers"
 require "double_keyed_hash"
 require "event"
 
@@ -25,7 +25,6 @@ require "worker"
 
 # This file is just a runner of things and hence does basic initialization of thingies required for running
 # the application.
-
 
 PACKET_APP = File.expand_path'../' unless defined?(PACKET_APP)
 
