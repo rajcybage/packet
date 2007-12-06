@@ -1,5 +1,18 @@
 class TodoContextMenu
+  attr_accessor :todo_menu
   def initialize(title = nil)
-    super(title)
+    @todo_menu = Gtk::Menu.new
+    empty_item = Gtk::MenuItem.new(" ")
+
+    @todo_menu.append(empty_item)
+    item = Gtk::MenuItem.new(title)
+    item.signal_connect("activate") { yield }
+    @todo_menu.append(item)
+    @todo_menu.show_all
   end
+
+  def show
+    @todo_menu.show_all
+  end
+
 end
