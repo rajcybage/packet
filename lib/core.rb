@@ -218,10 +218,6 @@ module Packet
             @timer_hash.delete(key) if !timer.respond_to?(:interval)
           end
         end
-
-#         @timer_hash.each do |timer|
-#           timer.run
-#         end
       end
 
       def initialize_handler(p_module)
