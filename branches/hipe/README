@@ -1,1 +1,0 @@
-This is a high performance version of packet library which makes use of native threads, epoll and other sutff.
