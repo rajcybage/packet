@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.0 on Mon Dec  3 19:23:40 2007 -->
+<!--Generated with glade3 3.4.0 on Sat Dec  8 18:15:29 2007 -->
 <glade-interface>
   <widget class="GtkWindow" id="todo_window">
     <property name="visible">True</property>
@@ -27,8 +27,10 @@
                 <property name="visible">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="label" translatable="yes">Sync</property>
+                <property name="use_underline">True</property>
                 <property name="stock_id">gtk-apply</property>
                 <signal name="clicked" handler="on_sync_button_clicked"/>
+                <accelerator key="s" modifiers="GDK_MOD1_MASK" signal="clicked"/>
               </widget>
               <packing>
                 <property name="expand">False</property>
@@ -41,6 +43,7 @@
                 <property name="label" translatable="yes">Reload</property>
                 <property name="stock_id">gtk-refresh</property>
                 <signal name="clicked" handler="on_reload_button_clicked"/>
+                <accelerator key="r" modifiers="GDK_MOD1_MASK" signal="clicked"/>
               </widget>
               <packing>
                 <property name="expand">False</property>
@@ -53,6 +56,7 @@
                 <property name="label" translatable="yes">Add</property>
                 <property name="stock_id">gtk-add</property>
                 <signal name="clicked" handler="on_add_todo_button_clicked"/>
+                <accelerator key="n" modifiers="GDK_CONTROL_MASK" signal="clicked"/>
               </widget>
               <packing>
                 <property name="expand">False</property>
