@@ -22,7 +22,7 @@ class TodoWindow
   # create a new dialog button for adding a todo, add that to the org file
   # update the disply.
   def on_add_todo_button_clicked
-    puts "Someone clicked add button"
+    @add_todo = AddTodoDialog.new
   end
 
   def on_todo_window_key_press_event(widget,key)
@@ -30,7 +30,7 @@ class TodoWindow
   end
 
   def on_reload_button_clicked
-    read_org_file
+    @todo_data = TodoData.new(@@todo_file_location)
     @model = create_model
     load_available_lists
     @todo_view.expand_all
@@ -46,7 +46,7 @@ class TodoWindow
     @todo_selection = @todo_view.selection
     @todo_selection.mode = Gtk::SELECTION_SINGLE
 
-    read_org_file
+    @todo_data = TodoData.new(@@todo_file_location)
     @model = create_model
     load_available_lists
     add_columns
@@ -82,7 +82,12 @@ class TodoWindow
   def mark_task_as_done
     selection = @todo_view.selection
     if iter = selection.selected
+      selected_category = iter.parent[0]
+      task = iter[0]
+      p selected_category,task
+      @todo_data.delete(selected_category,task)
       @todo_view.model.remove(iter)
+      @todo_data.dump
     end
   end
 
@@ -122,14 +127,14 @@ class TodoWindow
   def create_model
     model = Gtk::TreeStore.new(String,String,Fixnum)
 
-    todo_data.each do |key,value|
+    todo_data.open_tasks do |key,value|
       iter = model.append(nil)
       iter[0] = key
       iter[1] = "white"
       iter[2] = 900
       value.each do |todo_item|
         child_iter = model.append(iter)
-        child_iter[0] = todo_item.description
+        child_iter[0] = todo_item.text
         child_iter[1] = chose_color(todo_item)
         child_iter[2] = 500
       end
@@ -147,52 +152,6 @@ class TodoWindow
     end
   end
 
-  # could be written in a better way
-  def read_org_file
-    @todo_data = {}
-    File.open(@@todo_file_location) do |fl|
-      all_lines = fl.readlines
-      current_category = nil
-      all_lines.each do |todo_line|
-        todo_line.strip!.chomp!
-        next if todo_line.nil? or todo_line.empty?
-
-        if(todo_line !~ /(TODO|DONE)/i or todo_line =~ /^\*{1}\ /)
-          category_name = todo_line.split('*')[1].strip
-          @todo_data[category_name] ||= []
-          current_category = category_name
-        elsif todo_line =~ /TODO/i
-          todo_view_str = todo_line.gsub(/TODO/,'')
-          todo_view_str.gsub!(/\*/,'').strip!
-          todo_view_str = wrap_line(todo_view_str)
-          todo_item = TreeItem.new(todo_view_str,get_priority(todo_line),current_category)
-          @todo_data[current_category] << todo_item
-        end
-      end # end of line iterator
-    end # end of file open thingy
-    sort_by_priority
-  end # end of read_org_file method
-
-  def get_priority(main_str)
-    stars = $1 if main_str =~ /^(\*+)/
-    return stars.size
-  end
-
-  def sort_by_priority
-    @todo_data.each do |key,value|
-      value.sort! { |x,y| x.priority <=> y.priority }
-    end
-    @todo_data.delete_if { |key,value| value.empty? }
-  end
-
-  def wrap_line(line)
-    line_width,sep = 10,' '
-    words = line.split(sep)
-    return words.join(sep) if words.length < line_width
-    new_str = []
-    words.each_slice(line_width) { |x| new_str << x.join(sep) }
-    return new_str.join("\n")
-  end
 
 end
 
