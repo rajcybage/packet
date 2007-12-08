@@ -1,5 +1,6 @@
 require "enumerator"
 
+
 class TodoWindow
   attr_accessor :todo_data,:glade,:todo_window
 
@@ -56,7 +57,7 @@ class TodoWindow
 
   def connect_custom_signals
     # create an instance of context menu class and let it rot
-    @todo_context_menu = TodoContextMenu.new(" Mark as Done ")
+    @todo_context_menu = TodoContextMenu.new(" Mark as Done ") { mark_task_as_done }
 
     @todo_view.signal_connect("button_press_event") do |widget,event|
       if event.kind_of? Gdk::EventButton and event.button == 3
@@ -78,9 +79,10 @@ class TodoWindow
     end
   end
 
-  def display_context_menu(widget,button)
-    selection = widget.selection
+  def mark_task_as_done
+    selection = @todo_view.selection
     if iter = selection.selected
+      @todo_view.model.remove(iter)
     end
   end
 
@@ -97,6 +99,10 @@ class TodoWindow
     @todo_view.selection.mode = Gtk::SELECTION_SINGLE
   end
 
+  # checks out the new todo file
+  # checks in the new todo file
+  # writes in memory meta data statistics to yaml file
+  # refreshes the view
   def on_sync_button_clicked
     system("svn up #{@@todo_file_location}")
     system("svn ci #{@@todo_file_location} -m 'foo'")
