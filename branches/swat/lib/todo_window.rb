@@ -39,7 +39,7 @@ class TodoWindow
     @glade = GladeXML.new(path) { |handler| method(handler) }
     @todo_view = @glade.get_widget("todo_view")
     @todo_window = @glade.get_widget("todo_window")
-    window_icon = Gdk::Pixbuf.new("#{SWAT_APP}/resources/gedit-icon.png")
+    window_icon = Gdk::Pixbuf.new("#{SWAT_APP}/resources/todo.png")
     @todo_window.icon_list = [window_icon]
     @todo_window.title = "Your TaskList"
     @todo_selection = @todo_view.selection
@@ -98,7 +98,7 @@ class TodoWindow
   end
 
   def on_sync_button_clicked
-    puts "checking in code now"
+    system("svn up #{@@todo_file_location}")
     system("svn ci #{@@todo_file_location} -m 'foo'")
   end
 
@@ -180,7 +180,7 @@ class TodoWindow
   end
 
   def wrap_line(line)
-    line_width,sep = 18,' '
+    line_width,sep = 10,' '
     words = line.split(sep)
     return words.join(sep) if words.length < line_width
     new_str = []

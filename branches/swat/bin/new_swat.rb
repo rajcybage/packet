@@ -17,7 +17,7 @@ class Swat
 
   def initialize
     @status_icon = Gtk::StatusIcon.new
-    icon_file = Gdk::Pixbuf.new("#{SWAT_APP}/resources/gedit-icon.png")
+    icon_file = Gdk::Pixbuf.new("#{SWAT_APP}/resources/todo.png")
     @status_icon.pixbuf = icon_file
     TodoWindow.todo_file_location = File.join(ENV['HOME'], 'snippets/todo.org')
     TodoWindow.meta_data_file = File.open(File.join(ENV['HOME'], 'snippets/meta_data.txt'),"w+")
