@@ -31,6 +31,7 @@ class TodoData
 
   def open_tasks
     @todo_container.each do |category,todo_array|
+      next if todo_array.empty?
       todo_array.sort! { |x,y| x.priority <=> y.priority }
       todo_array.reject! { |x| !x.flag }
       yield(category,todo_array)
@@ -68,6 +69,15 @@ class TodoData
         task_item.flag = false
       end
     end
+  end
+
+  def categories
+    return @todo_container.keys
+  end
+
+  def insert(category,task,priority)
+    @todo_container[category] ||= []
+    @todo_container[category] << OpenStruct.new(:priority => priority, :text => task.gsub(/\n/,' '), :flag => true)
   end
 
 end

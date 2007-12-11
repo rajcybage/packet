@@ -1,6 +1,5 @@
 require "enumerator"
 
-
 class TodoWindow
   attr_accessor :todo_data,:glade,:todo_window
 
@@ -18,11 +17,31 @@ class TodoWindow
 
   def on_todo_window_destroy_event; return true; end
 
-  # add a new todo here
-  # create a new dialog button for adding a todo, add that to the org file
-  # update the disply.
   def on_add_todo_button_clicked
-    @add_todo = AddTodoDialog.new
+    AddTodoDialog.new(@todo_data.categories) do |priority,category,todo|
+      @todo_data.insert(category,todo,priority.to_i)
+      @meta_data.todo_added
+      @meta_data.dump
+      @todo_data.dump
+      @model = create_model
+      load_available_lists
+      @todo_view.expand_all
+      @stat_vbox.update_today_label(@meta_data)
+    end
+  end
+
+  def on_toggle_stat_button_clicked
+    # stat box is hidden
+    unless @stat_box_status
+      button_icon_widget = Gtk::Image.new("#{SWAT_APP}/resources/control_end_blue.png")
+      @stat_vbox.show_all
+    # stat box is already shown
+    else
+      button_icon_widget = Gtk::Image.new("#{SWAT_APP}/resources/control_rewind_blue.png")
+      @stat_vbox.hide_all
+    end
+    @stat_box_status = !@stat_box_status
+    @stat_toggle_button.image = button_icon_widget
   end
 
   def on_todo_window_key_press_event(widget,key)
@@ -46,6 +65,8 @@ class TodoWindow
     @todo_selection = @todo_view.selection
     @todo_selection.mode = Gtk::SELECTION_SINGLE
 
+    @meta_data = SwatMetaData.new(@@meta_data_file)
+    layout_statbar
     @todo_data = TodoData.new(@@todo_file_location)
     @model = create_model
     load_available_lists
@@ -55,8 +76,19 @@ class TodoWindow
     @todo_window.hide
   end
 
+  # layout statistic bar
+  def layout_statbar
+    @stat_toggle_button = @glade.get_widget("toggle_stat_button")
+    @stat_hbox = @glade.get_widget("stat_box")
+    @stat_vbox = StatBox.new(@meta_data)
+
+    @stat_hbox.pack_end(@stat_vbox.vbox_container,true)
+    button_icon_widget = Gtk::Image.new("#{SWAT_APP}/resources/control_rewind_blue.png")
+    @stat_box_status = false
+    @stat_toggle_button.image = button_icon_widget
+  end
+
   def connect_custom_signals
-    # create an instance of context menu class and let it rot
     @todo_context_menu = TodoContextMenu.new(" Mark as Done ") { mark_task_as_done }
 
     @todo_view.signal_connect("button_press_event") do |widget,event|
@@ -71,9 +103,9 @@ class TodoWindow
       if event.kind_of? Gdk::EventKey
         key_str = Gdk::Keyval.to_name(event.keyval)
         if key_str =~ /Left/i
-          #fold the block
+          # fold the block
         elsif key_str =~ /Right/i
-          #unfold the block
+          # unfold the block
         end
       end
     end
@@ -84,10 +116,12 @@ class TodoWindow
     if iter = selection.selected
       selected_category = iter.parent[0]
       task = iter[0]
-      p selected_category,task
       @todo_data.delete(selected_category,task)
       @todo_view.model.remove(iter)
       @todo_data.dump
+      @meta_data.todo_done
+      @meta_data.dump
+      @stat_vbox.update_today_label(@meta_data)
     end
   end
 
@@ -134,12 +168,24 @@ class TodoWindow
       iter[2] = 900
       value.each do |todo_item|
         child_iter = model.append(iter)
-        child_iter[0] = todo_item.text
+        child_iter[0] = wrap_line(todo_item.text)
         child_iter[1] = chose_color(todo_item)
         child_iter[2] = 500
       end
     end
     return model
+  end
+
+  def wrap_line(line)
+    line_array = []
+    loop do
+      first,last = line.unpack("a90a*")
+      first << "-" if last =~ /^\w/
+      line_array << first
+      break if last.empty?
+      line = last
+    end
+    return line_array.join("\n")
   end
 
   def chose_color(todo_item)
