@@ -2,11 +2,14 @@
 
 require "rubygems"
 require 'libglade2'
+require "erb"
 require "yaml"
 require "ostruct"
 SWAT_APP = File.expand_path(File.dirname(__FILE__)+"/..")
-["lib"].each { |x| $LOAD_PATH.unshift("#{SWAT_APP}/#{x}"); $LOAD_PATH.unshift("#{SWAT_APP}/#{x}/keybinder")}
+["lib","ext"].each { |x| $LOAD_PATH.unshift("#{SWAT_APP}/#{x}"); }
 
+require "stat_box"
+require "swat_meta_data"
 require "todo_context_menu"
 require "todo_window"
 require "keybinder"
@@ -23,7 +26,7 @@ class Swat
     icon_file = Gdk::Pixbuf.new("#{SWAT_APP}/resources/todo.png")
     @status_icon.pixbuf = icon_file
     TodoWindow.todo_file_location = File.join(ENV['HOME'], 'snippets/todo.org')
-    TodoWindow.meta_data_file = File.open(File.join(ENV['HOME'], 'snippets/meta_data.yml'),"w+")
+    TodoWindow.meta_data_file = File.join(ENV['HOME'], 'snippets/meta_data.yml')
     @todo_window = TodoWindow.new("#{SWAT_APP}/resources/todo_window.glade")
 
     @status_icon.set_tooltip("Your Task List")
