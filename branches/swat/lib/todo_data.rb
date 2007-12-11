@@ -6,9 +6,13 @@ class TodoData
   attr_accessor :config_file,:todo_container
   def initialize(config_file)
     @config_file = config_file
-    todo_lines = []
     @todo_container = {}
+    parse_file_data if File.exist?(@config_file)
+  end
+
+  def parse_file_data
     current_category = nil
+    todo_lines = []
     File.open(@config_file) {|fl| todo_lines = fl.readlines() }
     todo_lines.each do |todo_line|
       todo_line.strip!.chomp!
