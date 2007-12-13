@@ -40,3 +40,11 @@ end
 Rake::GemPackageTask.new(spec) do |p|
   p.gem_spec = spec
 end
+
+task :build do
+  system("cd ext;ruby extconf.rb;make")
+end
+
+task :clean do
+  %w(o so).each { |pattern| FileUtils.rm_r Dir.glob("ext/*.#{pattern}")}
+end
