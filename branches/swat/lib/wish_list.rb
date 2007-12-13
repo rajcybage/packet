@@ -46,7 +46,8 @@ module Swat
         selected_category = iter.parent[0]
         task_index = iter[3]
         priority = todo_data.get_priority(selected_category,task_index)
-        @parent_view.add_to_tasklist(selected_category,iter[0],priority)
+        task_text = todo_data.get_task(selected_category,task_index)
+        @parent_view.add_to_tasklist(selected_category,task_text,priority)
         todo_data.remove(selected_category,task_index)
         todo_data.dump
         @list_view.model.remove(iter)
