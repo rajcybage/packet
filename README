@@ -2,11 +2,17 @@ Swat is a todo list manager for Gnome & Emacs.
 
 Heck : Emacs?
 
-Yeah : In fact, swat just displays your tasks in red, blue and green. But you can't edit your tasks
-     in swat. For editing your tasks, you must fire your faithful Emacs and use org mode for editing
-     tasks.
+Features:
+  - Manage your todos, add them according to priority and category.
+  - Move your todos to wish list, when not feeling like working on them.
+  - libtomboy bindings for global shortcut(Alt-F11).
+  - Nice stats for your number of tasks finished and added.
+  - All your todos are in a .org file and hence can be managed from
+    Emacs as well.
 
-Swat : View tasks, view tasks by priority, sync using svn and ftp and all that sick things. 
-     Press Alt-F11 twice, to see the list.
-
+KeyBindings:
+  - Alt-F11 : from anywhere, brings the todo window to front.
+  - Esc : do dismiss todo window.
+  - Control-N : to add a todo.
+  
 
