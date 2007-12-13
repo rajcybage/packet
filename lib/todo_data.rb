@@ -96,6 +96,11 @@ module Swat
       result ? result.priority : 2
     end
 
+    def get_task(category,task_index)
+      result = @todo_container[category].detect { |x| x.index == task_index }
+      return result.text
+    end
+
   end
 end
 
