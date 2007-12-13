@@ -47,7 +47,10 @@ module Swat
     end
 
     def current_time; Time.now.strftime("%Y-%m-%d"); end
-    def yesterday; Time.now.yesterday.strftime("%Y-%m-%d"); end
+    def yesterday;
+      #Time.now.yesterday.strftime("%Y-%m-%d");
+      Time.now.strftime("%Y-%m-") + (Time.now.day - 1).to_s
+    end
 
     def lastweek; (0..6).to_a.map { |i| (Time.now - i*24*3600).strftime("%Y-%m-%d")}; end
 
