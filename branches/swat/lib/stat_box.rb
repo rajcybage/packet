@@ -24,7 +24,7 @@ module Swat
       @meta_data = p_meta_data if p_meta_data
       today_heading = Gtk::Label.new
       today_heading.xalign = 0.02
-      today_heading.set_markup("<span foreground='#6d0835' style='oblique' size='smaller'> Today </span>")
+      today_heading.set_markup("<span foreground='#6d0835' style='oblique' > Today </span>")
       @vbox_container.pack_start(today_heading,false,false)
 
       @today_label = Gtk::Label.new
@@ -54,7 +54,7 @@ module Swat
     def set_yesterday_label
       yesterday_heading = Gtk::Label.new
       yesterday_heading.xalign = 0.02
-      yesterday_heading.set_markup("<span foreground='#6d0835' style='oblique' size='smaller'> Yesterday </span>")
+      yesterday_heading.set_markup("<span foreground='#6d0835' style='oblique'> Yesterday </span>")
       @vbox_container.pack_start(yesterday_heading,false,false)
 
       @yesterday_label = Gtk::Label.new
@@ -68,7 +68,7 @@ module Swat
     def set_lastweek_label
       lastweek_heading = Gtk::Label.new
       lastweek_heading.xalign = 0.02
-      lastweek_heading.set_markup("<span foreground='#6d0835' style='oblique' size='smaller'> Lastweek </span>")
+      lastweek_heading.set_markup("<span foreground='#6d0835' style='oblique'> Lastweek </span>")
       @vbox_container.pack_start(lastweek_heading,false,false)
 
       @lastweek_label = Gtk::Label.new
