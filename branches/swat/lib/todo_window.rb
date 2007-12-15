@@ -76,6 +76,7 @@ module Swat
       add_columns
       connect_custom_signals
       layout_wishlist
+      layout_done_view
       @list_view.expand_all
       @todo_window.hide
     end
@@ -95,6 +96,11 @@ module Swat
     def layout_wishlist
       wish_list_view = @glade.get_widget("wish_list_view")
       @wish_list_tab = WishList.new(@@wishlist,wish_list_view,self)
+    end
+
+    def layout_done_view
+      done_view = @glade.get_widget("done_view")
+      @done_tab = CompletedView.new(done_view,self)
     end
 
     def connect_custom_signals
@@ -134,6 +140,7 @@ module Swat
         @meta_data.todo_done
         @meta_data.dump
         @stat_vbox.update_today_label(@meta_data)
+        @done_tab.reload_view
       end
     end
 

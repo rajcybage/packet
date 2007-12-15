@@ -22,10 +22,9 @@ module Swat
       @list_view.expander_column = column
     end
 
-    def create_model
+    def create_model(open_task = true)
       model = Gtk::TreeStore.new(String,String,Fixnum,Fixnum)
-
-      todo_data.open_tasks do |key,value|
+      populate_model = lambda do |key,value|
         iter = model.append(nil)
         iter[0] = key
         iter[1] = "white"
@@ -38,6 +37,12 @@ module Swat
           child_iter[2] = 500
           child_iter[3] = todo_item.index
         end
+      end
+
+      if(open_task)
+        todo_data.open_tasks(&populate_model)
+      else
+        todo_data.close_tasks(&populate_model)
       end
       return model
     end
