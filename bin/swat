@@ -18,6 +18,7 @@ require "keybinder"
 require "todo_data"
 require "add_todo_dialog"
 require "wish_list"
+require "completed_view"
 require "swat"
 
 Swat::SwatMain.new

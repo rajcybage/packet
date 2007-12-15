@@ -29,7 +29,7 @@ module Swat
           priority = $1.size
           item = OpenStruct.new(:priority => priority, :flag => false, :text => $2,:index => line_count )
           line_count += 1
-          @todo_container[current_category] << item
+          @todo_container[current_category].push(item)
         end
       end
     end
@@ -37,17 +37,20 @@ module Swat
     def open_tasks
       @todo_container.each do |category,todo_array|
         next if todo_array.empty?
-        todo_array.sort! { |x,y| x.priority <=> y.priority }
-        todo_array.reject! { |x| !x.flag }
-        yield(category,todo_array)
+        sorted_array = todo_array.sort { |x,y| x.priority <=> y.priority }
+        open_task_array = sorted_array.reject { |x| !x.flag }
+        next if open_task_array.empty?
+        yield(category,open_task_array)
       end
     end
 
-    def open_tasks_with_index
-      @todo_container.each_with_index do |category,todo_array,index|
-        todo_array.sort! { |x,y| x.priority <=> y.priority }
-        todo_array.reject! { |x| !x.flag }
-        yield(category,todo_array,index)
+    def close_tasks
+      @todo_container.each do |category,todo_array|
+        next if todo_array.empty?
+        sorted_array = todo_array.sort! { |x,y| x.priority <=> y.priority }
+        done_task_array = sorted_array.reject { |x| x.flag }
+        next if done_task_array.empty?
+        yield(category,done_task_array)
       end
     end
 
