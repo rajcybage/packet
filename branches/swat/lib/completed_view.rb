@@ -14,7 +14,9 @@ module Swat
 
     def reload_view
       @todo_data = parent_view.todo_data
-      super
+      @model = create_model(false)
+      load_available_lists
+      @list_view.expand_all
     end
   end
 end
