@@ -4,14 +4,19 @@ module Swat
     attr_accessor :todo_window
     attr_accessor :status_icon
     attr_accessor :key_binder
-
+    attr_accessor :config_dir
     def initialize
+      @config_dir = File.join(ENV['HOME'] + '/snippets')
+      create_config_directory
+
       @status_icon = Gtk::StatusIcon.new
       icon_file = Gdk::Pixbuf.new("#{SWAT_APP}/resources/todo.png")
       @status_icon.pixbuf = icon_file
-      TodoWindow.todo_file_location = File.join(ENV['HOME'], 'snippets/todo.org')
-      TodoWindow.wishlist = File.join(ENV['HOME'], 'snippets/wishlist.org')
-      TodoWindow.meta_data_file = File.join(ENV['HOME'], 'snippets/meta_data.yml')
+
+
+      TodoWindow.todo_file_location = File.join(ENV['HOME'], '/snippets/todo.org')
+      TodoWindow.wishlist = File.join(ENV['HOME'], '/snippets/wishlist.org')
+      TodoWindow.meta_data_file = File.join(ENV['HOME'], '/snippets/meta_data.yml')
       @todo_window = TodoWindow.new("#{SWAT_APP}/resources/todo_window.glade")
 
       @status_icon.set_tooltip("Your Task List")
@@ -26,6 +31,16 @@ module Swat
 
     def show_task_list
       @todo_window.show_window
+    end
+
+    # creates configuration files if they don't exist
+    def create_config_directory
+      if File.exist?(@config_dir) && !File.directory?(@config_dir)
+        raise "A file with same name as configuration directory #{@config_dir} exists in home directory"
+      end
+      unless File.exist?(@config_dir)
+        FileUtils.mkdir(@config_dir)
+      end
     end
 
     def display_context_menu(*args)
