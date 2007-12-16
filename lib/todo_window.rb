@@ -160,6 +160,8 @@ module Swat
 
     def show_window
       @todo_window = @glade.get_widget("todo_window")
+      @todo_window.keep_above = true
+      @todo_window.present
       @todo_window.show
     end
 
