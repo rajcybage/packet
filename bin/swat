@@ -6,6 +6,7 @@ require "erb"
 require "yaml"
 require "ostruct"
 require "enumerator"
+require "fileutils"
 SWAT_APP = File.expand_path(File.dirname(__FILE__)+"/..")
 ["lib","ext"].each { |x| $LOAD_PATH.unshift("#{SWAT_APP}/#{x}"); }
 
