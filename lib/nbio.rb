@@ -20,10 +20,8 @@ module Packet
       rescue Errno::EAGAIN
         return sock_data
       rescue Errno::EWOULDBLOCK
-        puts "Ok damn windows error"
         return sock_data
       rescue
-        puts "Some read error"
         raise DisconnectError.new(t_sock)
       end
     end
