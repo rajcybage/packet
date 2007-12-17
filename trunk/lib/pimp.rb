@@ -26,7 +26,7 @@ module Packet
     end
 
     alias_method :do_work, :send_data
-    def_delegators(:@reactor,:connections)
+    def_delegators :@reactor, :connections
   end
 end
 

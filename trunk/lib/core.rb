@@ -3,8 +3,7 @@ module Packet
   module Core
     def self.included(base_klass)
       base_klass.extend(ClassMethods)
-      base_klass.class_eval do
-        # iattr_accessor :connection_callbacks
+      base_klass.instance_eval do
         @@connection_callbacks ||= {}
         cattr_accessor :connection_callbacks
         attr_accessor :read_ios, :write_ios, :listen_sockets
@@ -30,7 +29,6 @@ module Packet
         connection_callbacks[:before_unbind] ||= []
         connection_callbacks[:before_unbind] << p_method
       end
-
     end # end of module#ClassMethods
 
     module CommonMethods
@@ -66,9 +64,9 @@ module Packet
 
       def accept_connection(sock_opts)
         sock_io = sock_opts[:socket]
-
         begin
           client_socket,client_sockaddr = sock_io.accept_nonblock
+          client_socket.setsockopt(Socket::IPPROTO_TCP,Socket::TCP_NODELAY,1)
         rescue Errno::EAGAIN, Errno::ECONNABORTED, Errno::EPROTO, Errno::EINTR
           puts "not ready yet"
           return
@@ -111,14 +109,29 @@ module Packet
         end
       end
 
+      def configure_socket_options
+        case RUBY_PLATFORM
+        when /linux/
+          # 9 is currently TCP_DEFER_ACCEPT
+          @tcp_defer_accept_opts = [Socket::SOL_TCP, 9, 1]
+          @tcp_cork_opts = [Socket::SOL_TCP, 3, 1]
+        when /freebsd(([1-4]\..{1,2})|5\.[0-4])/
+          # Do nothing, just closing a bug when freebsd <= 5.4
+        when /freebsd/
+          # Use the HTTP accept filter if available.
+          # The struct made by pack() is defined in /usr/include/sys/socket.h as accept_filter_arg
+          unless `/sbin/sysctl -nq net.inet.accf.http`.empty?
+            @tcp_defer_accept_opts = [Socket::SOL_SOCKET, Socket::SO_ACCEPTFILTER, ['httpready', nil].pack('a16a240')]
+          end
+        end
+      end
+
       # method opens a socket for listening
       def start_server(ip,port,t_module,&block)
-        t_socket = Socket.new(Socket::AF_INET,Socket::SOCK_STREAM,0)
-        t_socket.setsockopt(Socket::SOL_SOCKET,Socket::SO_REUSEADDR,true)
-        sockaddr = Socket.sockaddr_in(port.to_i,ip)
-        t_socket.bind(sockaddr)
-        t_socket.listen(50)
-        t_socket.setsockopt(Socket::IPPROTO_TCP,Socket::TCP_NODELAY,1)
+        BasicSocket.do_not_reverse_lookup = true
+        # configure_socket_options
+        t_socket = TCPServer.new(ip,port.to_i)
+        # t_socket.setsockopt(*@tcp_defer_accept_opts) rescue nil
         listen_sockets[t_socket.fileno] = { :socket => t_socket,:block => block,:module => t_module }
         @read_ios << t_socket
       end
@@ -129,6 +142,7 @@ module Packet
         Signal.trap("INT") { shutdown }
         loop do
           check_for_timer_events
+          user_thread_window #=> let user level threads run for a while
           ready_fds = select(@read_ios,@write_ios,nil,0.005)
           #next if ready_fds.blank?
 
@@ -143,6 +157,10 @@ module Packet
             end
           end
         end
+      end
+
+      def user_thread_window
+        run_user_threads if respond_to?(:run_user_threads)
       end
 
       def terminate_me
@@ -230,7 +248,6 @@ module Packet
           end
         return handler.new
       end
-
 
       def decorate_handler(t_socket,actually_connected,sock_addr,t_module,&block)
         handler_instance = initialize_handler(t_module)
