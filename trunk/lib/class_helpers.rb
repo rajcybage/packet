@@ -33,7 +33,7 @@ module Packet
         end
 
         def self.#{sym}
-            @@#{sym}
+          @@#{sym}
         end
 
         def #{sym}
