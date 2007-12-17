@@ -10,7 +10,7 @@ module Packet
         cattr_accessor :connection_callbacks
         attr_accessor :read_ios, :write_ios, :listen_sockets
         attr_accessor :connection_completion_awaited
-        attr_accessor :connections, :thread_pool
+        attr_accessor :connections, :thread_pool, :windows_flag
         include CommonMethods
       end
     end
@@ -134,7 +134,7 @@ module Packet
 
           ready_fds = ready_fds.flatten.compact
           ready_fds.each do |t_sock|
-            if t_sock.is_a? UNIXSocket
+            if(unix? && t_sock.is_a?(UNIXSocket))
               handle_internal_messages(t_sock)
             else
               handle_external_messages(t_sock)
@@ -211,6 +211,16 @@ module Packet
         # @timer_hash = Packet::TimerStore
         @timer_hash ||= {}
         @thread_pool = ThreadPool.new(thread_pool_size || 20)
+        @windows_flag = windows?
+      end
+
+      def windows?
+        return true if RUBY_PLATFORM =~ /win32/i
+        return false
+      end
+
+      def unix?
+        !@windows_flag
       end
 
       def check_for_timer_events
