@@ -1,10 +1,9 @@
-# FIXME: Some code is duplicated between worker class and this Reactor class, that can be fixed
-# with help of creation of Connection class and enabling automatic inheritance of that class and
-# mixing in of methods from that class.
 module Packet
   class Reactor
     include Core
     attr_accessor :fd_writers, :msg_writers,:msg_reader
+    attr_accessor :result_hash
+
     attr_accessor :live_workers
     after_connection :provide_workers
 
@@ -14,53 +13,36 @@ module Packet
 
     def self.run
       master_reactor_instance = new
+      # master_reactor_instance.result_hash = {}
       master_reactor_instance.live_workers = DoubleKeyedHash.new
       yield(master_reactor_instance)
       master_reactor_instance.load_workers
       master_reactor_instance.start_reactor
     end # end of run method
 
+    def set_result_hash(hash)
+      @result_hash = hash
+    end
+
+    def update_result(worker_key,result)
+      @result_hash ||= {}
+      @result_hash[worker_key.to_sym] = result
+    end
+
     def provide_workers(handler_instance,t_sock)
       class << handler_instance
         extend Forwardable
         attr_accessor :workers,:connection,:reactor, :initialized,:signature
         include NbioHelper
-
-        def send_data p_data
-          begin
-            write_data(p_data,connection)
-          rescue Errno::EPIPE
-            # probably a callback, when there is a error in writing to the socket
-          end
-        end
-
-        def invoke_init
-          @initialized = true
-          post_init
-        end
-
-        def close_connection
-          unbind
-          reactor.remove_connection(connection)
-        end
-
-        def close_connection_after_writing
-          connection.flush
-          unbind
-          reactor.remove_connection(connection)
-        end
-
+        include Connection
         def ask_worker(*args)
           worker_name = args.shift
           data_options = *args
           worker_name_key = gen_worker_key(worker_name,data_options[:job_key])
           data_options[:client_signature] = connection.fileno
-          workers[worker_name_key].send_request(data_options)
+          reactor.live_workers[worker_name_key].send_request(data_options)
         end
 
-        def send_object p_object
-          dump_object(p_object,connection)
-        end
         def_delegators(:@reactor, :start_server, :connect, :add_periodic_timer, \
                          :add_timer, :cancel_timer,:reconnect, :start_worker,:delete_worker)
 
@@ -144,11 +126,6 @@ module Packet
         $0 = "ruby #{worker_klass.worker_name}"
         [master_write_end,master_read_end,master_write_fd].each { |x| x.close }
 
-        if(defined?(@@server_logger) && @@server_logger && !@@server_logger.empty?)
-          log_file = File.open(@@server_logger,"w+")
-          [STDIN, STDOUT, STDERR].each {|desc| desc.reopen(log_file)}
-        end
-
         worker_klass.start_worker(:write_end => worker_write_end,:read_end => worker_read_end,\
                                   :read_fd => worker_read_fd,:options => worker_options)
       end
@@ -161,7 +138,9 @@ module Packet
         pimp_klass = Object.const_get(packet_classify(worker_pimp))
         @live_workers[worker_name_key,master_read_end.fileno] = pimp_klass.new(master_write_end,pid,self)
       else
-        @live_workers[worker_name_key,master_read_end.fileno] = Packet::MetaPimp.new(master_write_end,pid,self)
+        t_pimp = Packet::MetaPimp.new(master_write_end,pid,self)
+        t_pimp.worker_key = worker_name_key
+        @live_workers[worker_name_key,master_read_end.fileno] = t_pimp
       end
 
       worker_read_end.close

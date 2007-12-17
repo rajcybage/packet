@@ -1,4 +1,3 @@
-# FIXME: write this stupid parser in C.
 class BinParser
   def initialize
     @size = 0
@@ -10,8 +9,8 @@ class BinParser
     @numeric_length = 0
   end
 
-  # if you look at it, it could be a suicidal function
-  def extract new_data
+  def extract new_data, &block
+    extracter_block = block
     if @parser_state == 0
       length_to_read =  9 - @length_string.length
       len_str,remaining = new_data.unpack("a#{length_to_read}a*")
@@ -25,13 +24,22 @@ class BinParser
         if remaining.length < @numeric_length
           @data << remaining
           @numeric_length = @numeric_length - remaining.length
-        else
+        elsif remaining.length == @numeric_length
           @data << remaining
-          yield(@data.join)
+          extracter_block.call(@data.join)
           @data = []
           @parser_state = 0
           @length_string = ""
           @numeric_length = 0
+        else
+          pack_data,remaining = remaining.unpack("a#{@numeric_length}a*")
+          @data << pack_data
+          extracter_block.call(@data.join)
+          @data = []
+          @parser_state = 0
+          @length_string = ""
+          @numeric_length = 0
+          extract(remaining,&extracter_block)
         end
       end
     elsif @parser_state == 1
@@ -41,19 +49,19 @@ class BinParser
         @numeric_length = @numeric_length - pack_data.length
       elsif pack_data.length == @numeric_length
         @data << pack_data
-        yield(@data.join)
+        extracter_block.call(@data.join)
         @data = []
         @parser_state = 0
         @length_string = ""
         @numeric_length = 0
       else
         @data << pack_data
-        yield(@data.join)
+        extracter_block.call(@data.join)
         @data = []
         @parser_state = 0
         @length_string = ""
         @numeric_length = 0
-        extract(remaining)
+        extract(remaining,&extracter_block)
       end
     end
   end

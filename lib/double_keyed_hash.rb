@@ -1,4 +1,5 @@
 class DoubleKeyedHash
+  attr_accessor :internal_hash
   def initialize
     @keys1 = {}
     @internal_hash = {}

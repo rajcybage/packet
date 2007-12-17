@@ -2,32 +2,32 @@
 # main eventloop.
 
 module Packet
-  class Connection
-    # method gets called when connection to external server is completed
-    def connection_completed
-
+  module Connection
+    def send_data p_data
+      begin
+        write_data(p_data,connection)
+      rescue DisconnectError => sock_error
+        close_connection
+      end
     end
 
-    # method gets called when external client is disconnected
-    def unbind
-
+    def invoke_init
+      @initialized = true
+      post_init if respond_to?(:post_init)
     end
 
-    # method gets called just at the beginning of initializing things.
-    def post_init
-
+    def close_connection
+      unbind if respond_to?(:unbind)
+      reactor.remove_connection(connection)
     end
 
-    def send_data
-
+    def close_connection_after_writing
+      connection.flush
+      close_connection
     end
 
-    def ask_worker
-
-    end
-
-    def receive_data
-
+    def send_object p_object
+      dump_object(p_object,connection)
     end
   end # end of class Connection
 end # end of module Packet

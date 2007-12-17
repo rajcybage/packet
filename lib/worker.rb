@@ -62,34 +62,7 @@ module Packet
         extend Forwardable
         attr_accessor :worker, :connection, :reactor, :initialized, :signature
         include NbioHelper
-        def send_data p_data
-          begin
-            write_data(p_data,connection)
-          rescue Errno::EPIPE
-            # probably a callback
-          end
-        end
-
-        def invoke_init
-          @initialized = true
-          post_init
-        end
-
-        def close_connection
-          unbind
-          reactor.remove_connection(connection)
-        end
-
-        def close_connection_after_writing
-          connection.flush
-          unbind
-          reactor.remove_connection(connection)
-        end
-
-        def send_object p_object
-          dump_object(p_object,connection)
-        end
-
+        include Connection
         def_delegators :@reactor, :start_server, :connect, :add_periodic_timer, :add_timer, :cancel_timer,:reconnect
       end
       handler_instance.connection = connection

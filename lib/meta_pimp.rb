@@ -4,11 +4,12 @@
 class Packet::MetaPimp < Packet::Pimp
   # initializer of pimp
   attr_accessor :callback_hash
-  attr_accessor :worker_status
+  attr_accessor :worker_status, :worker_key
   def pimp_init
     @callback_hash ||= {}
     @worker_status = nil
     @worker_result = nil
+    @worker_key = nil
     @tokenizer = BinParser.new
   end
 
@@ -38,12 +39,14 @@ class Packet::MetaPimp < Packet::Pimp
   end
 
   def save_worker_status(data_options = { })
-    @worker_status = data_options[:data]
+    # @worker_status = data_options[:data]
+    reactor.update_result(worker_key,data_options[:data])
   end
 
   def process_request(data_options = {})
     if requested_worker = data_options[:requested_worker]
       reactor.live_workers[requested_worker].send_request(data_options)
+      #workers[requested_worker].send_request(data_options)
     end
   end
 

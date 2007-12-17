@@ -13,10 +13,14 @@ module Packet
     def read_data(t_sock)
       sock_data = ""
       begin
-        while(sock_data << t_sock.read_nonblock(1023)); end
+        while(t_data = t_sock.recv_nonblock(1023))
+          raise DisconnectError.new(t_sock) if t_data.empty?
+          sock_data << t_data
+        end
       rescue Errno::EAGAIN
         return sock_data
       rescue
+        puts "Some read error"
         raise DisconnectError.new(t_sock)
       end
     end
@@ -29,7 +33,6 @@ module Packet
         t_data = p_data.dup.to_s
       end
       t_length = t_data.length
-
       begin
         p_sock.write_nonblock(t_data)
       rescue Errno::EAGAIN
@@ -57,12 +60,16 @@ module Packet
       dump_length = object_dump.length.to_s
       length_str = dump_length.rjust(9,'0')
       final_data = length_str + object_dump
-
       begin
         p_sock.write_nonblock(final_data)
       rescue Errno::EAGAIN
+        puts "EAGAIN Error while writing socket"
+        return
+      rescue Errno::EINTR
+        puts "Interrupt error"
         return
       rescue Errno::EPIPE
+        puts "Pipe error"
         raise DisconnectError.new(p_sock)
       end
     end
