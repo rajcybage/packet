@@ -1,6 +1,7 @@
 module Packet
   class Reactor
     include Core
+    #set_thread_pool_size(20)
     attr_accessor :fd_writers, :msg_writers,:msg_reader
     attr_accessor :result_hash
 
@@ -73,10 +74,6 @@ module Packet
       @live_workers[worker_name_key].send_request(worker_options)
     end
 
-    # method loads workers in new processes
-    # FIXME: this method can be fixed, so as worker code can be actually, required
-    # only in forked process and hence saving upon the memory involved
-    # where worker is actually required in master as well as in worker.
     def load_workers
       if defined?(WORKER_ROOT)
         worker_root = WORKER_ROOT
@@ -91,12 +88,6 @@ module Packet
         worker_klass = Object.const_get(packet_classify(worker_name))
         next if worker_klass.no_auto_load
         fork_and_load(worker_klass)
-      end
-
-      # FIXME: easiest and yet perhaps a bit ugly, its just to make sure that from each
-      # worker proxy one can access other workers
-      @live_workers.each do |key,worker_instance|
-        worker_instance.workers = @live_workers
       end
     end
 

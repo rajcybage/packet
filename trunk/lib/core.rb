@@ -5,10 +5,12 @@ module Packet
       base_klass.extend(ClassMethods)
       base_klass.instance_eval do
         @@connection_callbacks ||= {}
+
+        iattr_accessor :thread_pool_size
         cattr_accessor :connection_callbacks
         attr_accessor :read_ios, :write_ios, :listen_sockets
         attr_accessor :connection_completion_awaited
-        attr_accessor :connections
+        attr_accessor :connections, :thread_pool
         include CommonMethods
       end
     end
@@ -109,27 +111,9 @@ module Packet
         end
       end
 
-      def configure_socket_options
-        case RUBY_PLATFORM
-        when /linux/
-          # 9 is currently TCP_DEFER_ACCEPT
-          @tcp_defer_accept_opts = [Socket::SOL_TCP, 9, 1]
-          @tcp_cork_opts = [Socket::SOL_TCP, 3, 1]
-        when /freebsd(([1-4]\..{1,2})|5\.[0-4])/
-          # Do nothing, just closing a bug when freebsd <= 5.4
-        when /freebsd/
-          # Use the HTTP accept filter if available.
-          # The struct made by pack() is defined in /usr/include/sys/socket.h as accept_filter_arg
-          unless `/sbin/sysctl -nq net.inet.accf.http`.empty?
-            @tcp_defer_accept_opts = [Socket::SOL_SOCKET, Socket::SO_ACCEPTFILTER, ['httpready', nil].pack('a16a240')]
-          end
-        end
-      end
-
       # method opens a socket for listening
       def start_server(ip,port,t_module,&block)
         BasicSocket.do_not_reverse_lookup = true
-        # configure_socket_options
         t_socket = TCPServer.new(ip,port.to_i)
         # t_socket.setsockopt(*@tcp_defer_accept_opts) rescue nil
         listen_sockets[t_socket.fileno] = { :socket => t_socket,:block => block,:module => t_module }
@@ -226,6 +210,7 @@ module Packet
 
         # @timer_hash = Packet::TimerStore
         @timer_hash ||= {}
+        @thread_pool = ThreadPool.new(thread_pool_size || 20)
       end
 
       def check_for_timer_events
