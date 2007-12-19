@@ -56,7 +56,7 @@ spec = Gem::Specification.new do |s|
   s.homepage = 'http://code.google.com/p/packet/'
   s.required_ruby_version = '>= 1.8.5'
 
-  s.files = %w(LICENSE README Rakefile TODO) + Dir.glob("{bin,spec,lib,examples,script, extras}/**/*")
+  s.files = %w(LICENSE README Rakefile TODO) + Dir.glob("{spec,lib,examples}/**/*")
 
   s.require_path = "lib"
   s.require_path += "extras"
