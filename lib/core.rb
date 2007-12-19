@@ -144,7 +144,8 @@ module Packet
       end
 
       def user_thread_window
-        run_user_threads if respond_to?(:run_user_threads)
+        # run_user_threads if respond_to?(:run_user_threads)
+        @thread_pool.exclusive_run
       end
 
       def terminate_me
@@ -168,7 +169,6 @@ module Packet
         elsif extern_opts = connection_completion_awaited[sock_fd]
           complete_connection(t_sock,extern_opts)
         else
-          puts "Some read event"
           read_external_socket(t_sock)
         end
       end

@@ -1,7 +1,7 @@
 module Packet
   class WorkData
     attr_accessor :data,:block
-    def initialize(*args,&block)
+    def initialize(args,&block)
       @data = args
       @block = block
     end
@@ -27,22 +27,24 @@ module Packet
         while true
           task = @work_queue.pop
           @running_tasks << task
-          if task.data && !task.data.empty?
-            task.block.call(*(task.data))
-          else
-            task.block.call
+          block_arity = task.block.arity
+          begin
+            block_arity == 0 ? task.block.call : task.block.call(*(task.data))
+          rescue
+            puts $!
+            puts $!.backtrace
           end
           @running_tasks.pop
         end
       end
     end
 
-    # method ensures exclusive run of deferred tasks for 2 seconds, so as they do get a chance to run.
+    # method ensures exclusive run of deferred tasks for 0.5 seconds, so as they do get a chance to run.
     def exclusive_run
       if @running_tasks.empty? && @work_queue.empty?
         return
       else
-        sleep(0.5)
+        sleep(0.005)
         return
       end
     end
