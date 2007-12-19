@@ -34,6 +34,7 @@ module Packet
       class << handler_instance
         extend Forwardable
         attr_accessor :workers,:connection,:reactor, :initialized,:signature
+        attr_accessor :thread_pool
         include NbioHelper
         include Connection
         def ask_worker(*args)
@@ -51,6 +52,7 @@ module Packet
       handler_instance.workers = @live_workers
       handler_instance.connection = t_sock
       handler_instance.reactor = self
+      handler_instance.thread_pool = @thread_pool
     end
 
     # FIXME: right now, each worker is tied to its connection and this can be problematic

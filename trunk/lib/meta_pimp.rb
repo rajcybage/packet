@@ -52,9 +52,16 @@ class Packet::MetaPimp < Packet::Pimp
   def process_response(data_options = {})
     if callback_signature = data_options[:callback_signature]
       callback = callback_hash[callback_signature]
-      callback.invoke(data_options)
+      # there coule be bug when you are trying to send the data back to the client
+      begin
+        callback.invoke(data_options)
+      rescue
+      end
     elsif client_signature = data_options[:client_signature]
-      reactor.connections[client_signature].instance.worker_receive(data_options)
+      begin
+        reactor.connections[client_signature].instance.worker_receive(data_options)
+      rescue
+      end
     end
   end
 

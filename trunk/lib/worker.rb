@@ -61,6 +61,7 @@ module Packet
       class << handler_instance
         extend Forwardable
         attr_accessor :worker, :connection, :reactor, :initialized, :signature
+        attr_accessor :thread_pool
         include NbioHelper
         include Connection
         def_delegators :@reactor, :start_server, :connect, :add_periodic_timer, :add_timer, :cancel_timer,:reconnect
@@ -68,6 +69,7 @@ module Packet
       handler_instance.connection = connection
       handler_instance.worker = self
       handler_instance.reactor = self
+      handler_instance.thread_pool = @thread_pool
     end
 
     def log log_data
