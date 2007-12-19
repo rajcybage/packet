@@ -168,6 +168,7 @@ module Packet
         elsif extern_opts = connection_completion_awaited[sock_fd]
           complete_connection(t_sock,extern_opts)
         else
+          puts "Some read event"
           read_external_socket(t_sock)
         end
       end

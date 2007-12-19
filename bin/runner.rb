@@ -35,6 +35,6 @@ class Foo
 end
 
 Packet::Reactor.run do |t_reactor|
-  t_reactor.start_server("0.0.0.0", 11006,Foo)
+  t_reactor.start_server("0.0.0.0", 11007,Foo)
 end
 
