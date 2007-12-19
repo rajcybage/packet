@@ -7,8 +7,8 @@ require "packet"
 class Foo
   def receive_data p_data
     send_data(p_data)
-    #data_callback = Packet::Callback.new { |data| show_result(data) }
-    #workers[:no_proxy_worker].send_request(:data => p_data,:callback => data_callback)
+    # data_callback = Packet::Callback.new { |data| show_result(data) }
+    # workers[:no_proxy_worker].send_request(:data => p_data,:callback => data_callback)
     # ask_worker(:no_proxy_worker,:data => p_data, :type => :request)
     # ask_worker(:dynamic_worker,:job_key => :hello_world, :data => p_data, :type => :request)
   end
@@ -24,6 +24,13 @@ class Foo
   def connection_completed
     #add_periodic_timer(4) { send_data("hello\n")}
     #start_worker(:worker => :dynamic_worker, :job_key => :hello_world)
+    100.times do |i|
+      thread_pool.defer(i) do |j|
+        puts "Starting work for #{j} : #{j.class}"
+        sleep(1)
+        puts "Work done for #{j}"
+      end
+    end
   end
 
   def post_init
