@@ -5,10 +5,12 @@
 # Camping, Nitro, etc....
 PACKET_APP = File.expand_path(File.join(File.dirname(__FILE__) + "/.."))
 ["bin","config","parser","worker","framework","lib","pimp"].each { |x| $LOAD_PATH.unshift(PACKET_APP + "/#{x}")}
+require "rubygems"
 require "packet"
+require 'mongrel'
 
 module Mongrel
-  class MongrelProtocol < Packet::Connection
+  class MongrelProtocol
     def post_init
       @parser = HttpParser.new
       @params = HttpParams.new
@@ -212,3 +214,7 @@ module Mongrel
     end
   end
 end
+
+a = Mongrel::HttpServer.new("localhost",11005)
+a.run
+
