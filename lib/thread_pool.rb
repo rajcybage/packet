@@ -48,7 +48,6 @@ module Packet
         return
       end
     end
-
   end # end of ThreadPool class
 
 end # end of Packet module

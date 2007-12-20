@@ -98,7 +98,10 @@ module Packet
       worker_name_key = gen_worker_key(worker_name,worker_options[:job_key])
       return if @live_workers[worker_name_key]
       worker_options.delete(:worker)
-      require worker_name
+      begin
+        require worker_name
+      rescue LoadError
+      end
       worker_klass = Object.const_get(packet_classify(worker_name))
       fork_and_load(worker_klass,worker_options)
     end
