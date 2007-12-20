@@ -32,7 +32,7 @@ task :doc => [:rdoc]
 
 
 Rake::RDocTask.new do |rdoc|
-      files = ['README', 'LICENSE', 'CHANGELOG',
+      files = ['README', 'MIT-LICENSE', 'CHANGELOG',
                'lib/**/*.rb']
       rdoc.rdoc_files.add(files)
       rdoc.main = 'README'
@@ -46,7 +46,7 @@ spec = Gem::Specification.new do |s|
   s.version = Packet::VERSION
   s.platform = Gem::Platform::RUBY
   s.has_rdoc = true
-  s.extra_rdoc_files = ["README", "LICENSE", 'TODO']
+  s.extra_rdoc_files = ["README", "MIT-LICENSE", 'TODO']
   #s.rdoc_options += RDOC_OPTS +
   #  ['--exclude', '^(app|uploads)']
   s.summary = "Packet, A Pure Ruby library for Event Driven Network Programming."
@@ -56,11 +56,9 @@ spec = Gem::Specification.new do |s|
   s.homepage = 'http://code.google.com/p/packet/'
   s.required_ruby_version = '>= 1.8.5'
 
-  s.files = %w(LICENSE README Rakefile TODO) + Dir.glob("{spec,lib,examples}/**/*")
+  s.files = %w(MIT-LICENSE README Rakefile TODO) + Dir.glob("{spec,lib,examples}/**/*")
 
   s.require_path = "lib"
-  s.require_path += "extras"
-  s.bindir = "bin"
 end
 
 Rake::GemPackageTask.new(spec) do |p|
