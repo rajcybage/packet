@@ -1,7 +1,7 @@
 EVAL_APP_ROOT = File.expand_path(File.join(File.dirname(__FILE__) + "/.."))
 ["bin","worker","lib"].each { |x| $LOAD_PATH.unshift(EVAL_APP_ROOT + "/#{x}")}
 
-#WORKER_ROOT = EVAL_APP_ROOT + "/worker"
+WORKER_ROOT = EVAL_APP_ROOT + "/worker"
 
 require "packet"
 class Foo
