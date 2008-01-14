@@ -11,21 +11,22 @@ module Packet
     end
 
     def read_data(t_sock)
-      sock_data = ""
+      sock_data = []
       begin
-        while(t_data = t_sock.recv_nonblock(1023))
+        while(t_data = t_sock.recv_nonblock((16*1024)-1))
           raise DisconnectError.new(t_sock) if t_data.empty?
           sock_data << t_data
         end
       rescue Errno::EAGAIN
-        return sock_data
+        return sock_data.join
       rescue Errno::EWOULDBLOCK
-        return sock_data
+        return sock_data.join
       rescue
         raise DisconnectError.new(t_sock)
       end
     end
 
+    # FIXME: method has bug in writing to sockets.
     def write_data(p_data,p_sock)
       return unless p_data
       if p_data.is_a? Fixnum
@@ -33,35 +34,28 @@ module Packet
       else
         t_data = p_data.dup.to_s
       end
+
       t_length = t_data.length
       begin
         loop do
-          puts "looping boy"
           break if t_length <= 0
           written_length = p_sock.write_nonblock(t_data)
-          puts "written length : #{written_length}"
-          #p_sock.flush
+          p_sock.flush
           t_data = t_data[written_length..-1]
           t_length = t_data.length
         end
       rescue Errno::EAGAIN
-        puts "error eagain"
         return
       rescue Errno::EPIPE
-        puts "pipe error"
-        raise DisconnectError.new(p_sock)
-      rescue Errno::ECONNRESET
-        puts "peer connrest"
         raise DisconnectError.new(p_sock)
       rescue
-        puts $!.to_s
         raise DisconnectError.new(p_sock)
       end
     end
 
     # method writes data to socket in a non blocking manner, but doesn't care if there is a error writing data
     def write_once(p_data,p_sock)
-      t_data = p_data.dup.to_s
+      t_data = p_data.to_s
       written_length = 0
       data_length = t_data.length
       begin
@@ -88,18 +82,7 @@ module Packet
       dump_length = object_dump.length.to_s
       length_str = dump_length.rjust(9,'0')
       final_data = length_str + object_dump
-      begin
-        p_sock.write_nonblock(final_data)
-      rescue Errno::EAGAIN
-        puts "EAGAIN Error while writing socket"
-        return
-      rescue Errno::EINTR
-        puts "Interrupt error"
-        return
-      rescue Errno::EPIPE
-        puts "Pipe error"
-        raise DisconnectError.new(p_sock)
-      end
+      write_data(final_data,p_sock)
     end
   end
 end

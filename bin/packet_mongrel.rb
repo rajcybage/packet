@@ -215,6 +215,4 @@ module Mongrel
   end
 end
 
-a = Mongrel::HttpServer.new("localhost",11005)
-a.run
 
