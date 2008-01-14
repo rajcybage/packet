@@ -4,9 +4,11 @@
 module Packet
   module Connection
     attr_accessor :outbound_data 
+    
     def send_data p_data
       begin
-        write_data(p_data,connection)
+        leftover = write_once(p_data,connection)
+        @outbound_data << leftover if leftover && !leftover.empty?
       rescue DisconnectError => sock_error
         close_connection
       end
@@ -14,6 +16,7 @@ module Packet
 
     def invoke_init
       @initialized = true
+      @outbound_data = []
       post_init if respond_to?(:post_init)
     end
 
