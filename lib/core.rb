@@ -130,7 +130,7 @@ module Packet
         loop do
           check_for_timer_events
           user_thread_window #=> let user level threads run for a while
-          ready_fds = select(@read_ios,@write_ios,nil,0.005)
+          ready_read_fds,ready_write_fds,read_error_fds = select(@read_ios,@write_ios,nil,0.005)
           #next if ready_fds.blank?
 
           next if !ready_fds or ready_fds.empty?

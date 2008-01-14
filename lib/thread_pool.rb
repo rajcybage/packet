@@ -44,7 +44,7 @@ module Packet
       if @running_tasks.empty? && @work_queue.empty?
         return
       else
-        sleep(0.5)
+        sleep(0.05)
         return
       end
     end
