@@ -2,12 +2,12 @@ require "socket"
 require "thread"
 
 # sock = TCPSocket.open("localhost",11007)
-data = File.open("netbeans.jpg").read
-# data = File.open("nginx.dat").read
+#data = File.open("netbeans.jpg").read
+data = File.open("nginx.dat").read
 # p data.length
 
 threads = []
-100.times do
+500.times do
   #   sock.write(data)
   #   select([sock],nil,nil,nil)
   #   read_data = ""
