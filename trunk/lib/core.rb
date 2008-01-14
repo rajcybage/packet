@@ -131,6 +131,7 @@ module Packet
           check_for_timer_events
           user_thread_window #=> let user level threads run for a while
           ready_read_fds,ready_write_fds,read_error_fds = select(@read_ios,@write_ios,nil,0.005)
+          # ready_fds = select(@read_ios,@write_ios,nil,0.005)
           #next if ready_fds.blank?
 
           next if !ready_fds or ready_fds.empty?
@@ -204,6 +205,11 @@ module Packet
       def cancel_timer(t_timer)
         @timer_hash.delete(t_timer.timer_signature)
       end
+      
+      def binding_str
+        @binding += 1
+        "BIND_" + @binding
+      end
 
       def initialize
         @read_ios ||= []
@@ -211,6 +217,7 @@ module Packet
         @connection_completion_awaited ||= {}
         @connections ||= {}
         @listen_sockets ||= {}
+        @binding = 0
 
         # @timer_hash = Packet::TimerStore
         @timer_hash ||= {}
@@ -247,7 +254,7 @@ module Packet
           end
         return handler.new
       end
-
+      
       def decorate_handler(t_socket,actually_connected,sock_addr,t_module,&block)
         handler_instance = initialize_handler(t_module)
         connection_callbacks[:after_connection].each { |t_callback| self.send(t_callback,handler_instance,t_socket)}
@@ -256,10 +263,9 @@ module Packet
           handler_instance.unbind if handler_instance.respond_to?(:unbind)
           return
         end
-        t_signature = Guid.hexdigest
-        handler_instance.signature = t_signature
+        handler_instance.signature = binding_str
         connections[t_socket.fileno] =
-          OpenStruct.new(:socket => t_socket, :instance => handler_instance, :signature => t_signature,:sock_addr => sock_addr)
+          OpenStruct.new(:socket => t_socket, :instance => handler_instance, :signature => handler_instance.signature,:sock_addr => sock_addr)
         block.call(handler_instance) if block
         handler_instance.connection_completed if handler_instance.respond_to?(:connection_completed)
       end

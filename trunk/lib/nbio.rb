@@ -36,9 +36,11 @@ module Packet
       t_length = t_data.length
       begin
         loop do
+          puts "looping boy" 
           break if t_length <= 0
           written_length = p_sock.write_nonblock(t_data)
-          p_sock.flush
+          puts "written length : #{written_length}" 
+          #p_sock.flush
           t_data = t_data[written_length..-1]
           t_length = t_data.length
         end
@@ -60,10 +62,17 @@ module Packet
     # method writes data to socket in a non blocking manner, but doesn't care if there is a error writing data
     def write_once(p_data,p_sock)
       t_data = p_data.dup.to_s
+      written_length = 0
+      data_length = t_data.length
       begin
-        p_sock.write_nonblock(t_data)
+        written_length = p_sock.write_nonblock(t_data)
+        if written_length == data_length
+          return "" 
+        else
+          return t_data[written_length..-1]
+        end
       rescue Errno::EAGAIN
-        return
+        return t_data[written_length..-1]
       rescue Errno::EPIPE
         raise DisconnectError.new(p_sock)
       end
