@@ -3,7 +3,7 @@ module Packet
     attr_accessor :data,:block
     def initialize(args,&block)
       @data = args
-      @block = block    
+      @block = block
     end
   end
 
@@ -18,8 +18,13 @@ module Packet
       @running_tasks = Queue.new
       @size.times { add_thread }
     end
+
     def defer(*args,&block)
       @work_queue << WorkData.new(args,&block)
+    end
+
+    def kill_all
+      @threads.each { |thr| Thread.kill(thr) }
     end
 
     def add_thread

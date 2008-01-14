@@ -9,7 +9,7 @@ module Packet
         iattr_accessor :thread_pool_size
         cattr_accessor :connection_callbacks
         attr_accessor :read_ios, :write_ios, :listen_sockets
-        attr_accessor :connection_completion_awaited
+        attr_accessor :connection_completion_awaited,:write_scheduled
         attr_accessor :connections, :thread_pool, :windows_flag
         include CommonMethods
       end
@@ -70,7 +70,6 @@ module Packet
           client_socket,client_sockaddr = sock_io.accept_nonblock
           client_socket.setsockopt(Socket::IPPROTO_TCP,Socket::TCP_NODELAY,1)
         rescue Errno::EAGAIN, Errno::ECONNABORTED, Errno::EPROTO, Errno::EINTR
-          puts "not ready yet"
           return
         end
         read_ios << client_socket
@@ -96,8 +95,8 @@ module Packet
 
       # method removes the connection and closes the socket
       def remove_connection(t_sock)
-        @read_ios.delete(t_sock)
-        @write_ios.delete(t_sock)
+        read_ios.delete(t_sock)
+        write_ios.delete(t_sock)
         begin
           connections.delete(t_sock.fileno)
           t_sock.close
@@ -125,39 +124,71 @@ module Packet
 
       # method starts event loop in the process
       def start_reactor
-        Signal.trap("TERM") { terminate_me }
-        Signal.trap("INT") { shutdown }
+        #Signal.trap("TERM") { terminate_me }
+        #Signal.trap("INT") { shutdown }
         loop do
           check_for_timer_events
           user_thread_window #=> let user level threads run for a while
-          ready_read_fds,ready_write_fds,read_error_fds = select(@read_ios,@write_ios,nil,0.005)
-          # ready_fds = select(@read_ios,@write_ios,nil,0.005)
-          #next if ready_fds.blank?
+          ready_read_fds,ready_write_fds,read_error_fds = select(read_ios,write_ios,nil,0.005)
 
-          next if !ready_fds or ready_fds.empty?
+          if ready_read_fds && !ready_read_fds.empty?
+            handle_read_event(ready_read_fds)
+          elsif ready_write_fds && !ready_write_fds.empty?
+            handle_write_event(ready_write_fds)
+          end
+        end
 
-          ready_fds = ready_fds.flatten.compact
-          ready_fds.each do |t_sock|
-            if(unix? && t_sock.is_a?(UNIXSocket))
-              handle_internal_messages(t_sock)
-            else
-              handle_external_messages(t_sock)
-            end
+      end
+
+      def schedule_write(t_sock)
+        unless write_scheduled[t_sock.fileno]
+          write_ios << t_sock
+          write_scheduled[t_sock.fileno] ||= connections[t_sock.fileno].instance
+        end
+      end
+
+      def cancel_write(t_sock)
+        write_ios.delete(t_sock)
+        begin
+          write_scheduled.delete(t_sock.fileno)
+        rescue; end
+      end
+
+      def handle_write_event(p_ready_fds)
+        ready_fds = p_ready_fds.map { |x| x.fileno }
+        ready_fds.each do |sock_fd|
+          if extern_opts = connection_completion_awaited[sock_fd]
+            complete_connection(t_sock,extern_opts)
+          else handler_instance = write_scheduled[sock_fd]
+            handler_instance.write_and_schedule
+          end
+        end
+      end
+
+      def handle_read_event(p_ready_fds)
+        ready_fds = p_ready_fds.flatten.compact
+        ready_fds.each do |t_sock|
+          if(unix? && t_sock.is_a?(UNIXSocket))
+            handle_internal_messages(t_sock)
+          else
+            handle_external_messages(t_sock)
           end
         end
       end
 
       def user_thread_window
         # run_user_threads if respond_to?(:run_user_threads)
-        @thread_pool.exclusive_run
+        # @thread_pool.exclusive_run
       end
 
       def terminate_me
         # FIXME: close the open sockets
+        # @thread_pool.kill_all
         exit
       end
 
       def shutdown
+        # @thread_pool.kill_all
         # FIXME: close the open sockets
         exit
       end
@@ -170,8 +201,6 @@ module Packet
         sock_fd = t_sock.fileno
         if sock_opts = listen_sockets[sock_fd]
           accept_connection(sock_opts)
-        elsif extern_opts = connection_completion_awaited[sock_fd]
-          complete_connection(t_sock,extern_opts)
         else
           read_external_socket(t_sock)
         end
@@ -183,9 +212,7 @@ module Packet
           t_data = read_data(t_sock)
           handler_instance.receive_data(t_data) if handler_instance.respond_to?(:receive_data)
         rescue DisconnectError => sock_error
-          handler_instance.unbind if handler_instance.respond_to?(:unbind)
-          connections.delete(t_sock.fileno)
-          read_ios.delete(t_sock)
+          handler_instance.close_connection
         end
       end
 
@@ -205,23 +232,24 @@ module Packet
       def cancel_timer(t_timer)
         @timer_hash.delete(t_timer.timer_signature)
       end
-      
+
       def binding_str
         @binding += 1
-        "BIND_" + @binding
+        "BIND_#{@binding}"
       end
 
       def initialize
         @read_ios ||= []
         @write_ios ||= []
         @connection_completion_awaited ||= {}
+        @write_scheduled ||= {}
         @connections ||= {}
         @listen_sockets ||= {}
         @binding = 0
 
         # @timer_hash = Packet::TimerStore
         @timer_hash ||= {}
-        @thread_pool = ThreadPool.new(thread_pool_size || 20)
+        # @thread_pool = ThreadPool.new(thread_pool_size || 20)
         @windows_flag = windows?
       end
 
@@ -254,7 +282,7 @@ module Packet
           end
         return handler.new
       end
-      
+
       def decorate_handler(t_socket,actually_connected,sock_addr,t_module,&block)
         handler_instance = initialize_handler(t_module)
         connection_callbacks[:after_connection].each { |t_callback| self.send(t_callback,handler_instance,t_socket)}
