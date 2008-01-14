@@ -1,6 +1,6 @@
 class NoProxyWorker < Packet::Worker
   set_worker_name :no_proxy_worker
-  set_no_auto_load(true)
+  #set_no_auto_load(true)
   def worker_init
     p "Starting no proxy worker"
   end
