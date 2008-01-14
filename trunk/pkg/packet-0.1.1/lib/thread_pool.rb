@@ -3,7 +3,7 @@ module Packet
     attr_accessor :data,:block
     def initialize(args,&block)
       @data = args
-      @block = block    
+      @block = block
     end
   end
 
@@ -39,12 +39,12 @@ module Packet
       end
     end
 
-    # method ensures exclusive run of deferred tasks for 0.005 seconds, so as they do get a chance to run.
+    # method ensures exclusive run of deferred tasks for 0.5 seconds, so as they do get a chance to run.
     def exclusive_run
       if @running_tasks.empty? && @work_queue.empty?
         return
       else
-        sleep(0.5)
+        sleep(0.005)
         return
       end
     end

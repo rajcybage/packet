@@ -3,9 +3,6 @@
  Nothing more, nothing less.
 =end
 
-require "event" 
-require "packet_guid" 
-
 module Packet
   class TimerStore
     attr_accessor :order
@@ -19,21 +16,15 @@ module Packet
       @container[int_time] ||= []
       @container[int_time] << timer
 
-      if @container.empty? or @order.empty?
+      if @container.empty?
         @order << int_time
         return
       end
-
-
-      if @order.last <= int_time
+      if @order.last <= key
         @order << int_time
       else
-        index = bin_search_for_key(0,@order.length - 1,int_time)
-        if(int_time < @order[index-1] && index != 0)
-          @order.insert(index-1,int_time)
-        else
-          @order.insert(index,int_time)
-        end
+        index = bin_search_for_key(o,@order.length - 1,int_time)
+        @order.insert(index,int_time)
       end
     end
 
@@ -48,24 +39,25 @@ module Packet
         bin_search_for_key(lower_index,pivot,key)
       end
     end
+  end
 
-    def each
-      @order.each_with_index do |x,i|
-        @container[x].each do |timer| 
-          yield timer
-        end
-        # @container.delete(x) if @container[x].empty?
-        # @order.delete_at(i)
-      end
-    end
-
-    def delete(timer)
-      int_time = timer.scheduled_time.to_i
-      @container[int_time] && @container[int_time].delete(timer)
-
-      if(!@container[int_time] || @container[int_time].empty?)
-        @order.delete(timer)
+  def each
+    @order.each_with_index do |x,i|
+      if x <= Time.now.to_i
+        @container[x].each { |timer| yield x }
+        @container.delete(x)
+        @order.delete_at(i)
       end
     end
   end
+
+  def delete(timer)
+    int_time = timer.scheduled_time
+    @container[int_time] && @container[int_time].delete(timer)
+
+    if(!@container[int_time] || @container[int_time].empty?)
+      @order.delete(timer)
+    end
+  end
 end
+
