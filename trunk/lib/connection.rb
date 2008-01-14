@@ -3,6 +3,7 @@
 
 module Packet
   module Connection
+    attr_accessor :outbound_data 
     def send_data p_data
       begin
         write_data(p_data,connection)
