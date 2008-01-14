@@ -124,8 +124,8 @@ module Packet
 
       # method starts event loop in the process
       def start_reactor
-        #Signal.trap("TERM") { terminate_me }
-        #Signal.trap("INT") { shutdown }
+        Signal.trap("TERM") { terminate_me }
+        Signal.trap("INT") { shutdown }
         loop do
           check_for_timer_events
           user_thread_window #=> let user level threads run for a while

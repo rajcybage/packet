@@ -51,6 +51,7 @@ module Packet
           break
         end
       end
+      reactor.cancel_write(connection) if @outbound_data.empty?
     end
   end # end of class Connection
 end # end of module Packet
