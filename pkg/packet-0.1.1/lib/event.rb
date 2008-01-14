@@ -1,6 +1,6 @@
 module Packet
   class Event
-    attr_accessor :timer_signature, :block, :cancel_flag, :scheduled_time
+    attr_accessor :timer_signature, :block, :cancel_flag
     def initialize(elapsed_time,&block)
       @cancel_flag = false
       @timer_signature = Guid.hexdigest

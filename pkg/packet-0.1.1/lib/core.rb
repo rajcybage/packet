@@ -98,11 +98,8 @@ module Packet
       def remove_connection(t_sock)
         @read_ios.delete(t_sock)
         @write_ios.delete(t_sock)
-        begin
-          connections.delete(t_sock.fileno)
-          t_sock.close
-        rescue
-        end
+        connections.delete(t_sock.fileno)
+        t_sock.close
       end
 
       def socket_really_connected?(t_sock)

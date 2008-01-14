@@ -1,11 +1,12 @@
 module Packet
-  class Event
-    attr_accessor :timer_signature, :block, :cancel_flag, :scheduled_time
-    def initialize(elapsed_time,&block)
+  class PeriodicEvent
+    attr_accessor :block, :timer_signature, :interval, :cancel_flag
+    def initialize(interval, &block)
       @cancel_flag = false
       @timer_signature = Guid.hexdigest
       @block = block
-      @scheduled_time = Time.now + elapsed_time
+      @scheduled_time = Time.now + interval
+      @interval = interval
     end
 
     def run_now?
@@ -18,8 +19,9 @@ module Packet
     end
 
     def run
+      @scheduled_time += @interval
       @block.call
     end
+
   end
 end
-# WOW

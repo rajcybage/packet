@@ -35,24 +35,10 @@ module Packet
       end
       t_length = t_data.length
       begin
-        loop do
-          break if t_length <= 0
-          written_length = p_sock.write_nonblock(t_data)
-          p_sock.flush
-          t_data = t_data[written_length..-1]
-          t_length = t_data.length
-        end
+        p_sock.write_nonblock(t_data)
       rescue Errno::EAGAIN
-        puts "error eagain"
         return
       rescue Errno::EPIPE
-        puts "pipe error"
-        raise DisconnectError.new(p_sock)
-      rescue Errno::ECONNRESET
-        puts "peer connrest"
-        raise DisconnectError.new(p_sock)
-      rescue
-        puts $!.to_s
         raise DisconnectError.new(p_sock)
       end
     end
