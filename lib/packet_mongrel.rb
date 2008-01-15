@@ -120,8 +120,6 @@ module Mongrel
         # And finally, if nobody closed the response off, we finalize it.
         unless response.done
           response.finished
-        else
-          response.close_connection
         end
       else
         # Didn't find it, return a stock 404 response.
