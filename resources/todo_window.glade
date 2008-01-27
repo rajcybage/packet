@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.0 on Sat Dec 15 12:51:59 2007 -->
+<!--Generated with glade3 3.4.0 on Tue Dec 25 16:53:58 2007 -->
 <glade-interface>
   <widget class="GtkWindow" id="todo_window">
     <property name="visible">True</property>
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
     <property name="default_width">800</property>
     <property name="default_height">700</property>
-    <property name="opacity">0.52999997138977051</property>
+    <property name="opacity">0.95999997854232788</property>
     <signal name="key_press_event" handler="on_todo_window_key_press_event"/>
     <signal name="delete_event" handler="on_todo_window_delete_event"/>
     <signal name="destroy_event" handler="on_todo_window_destroy_event"/>
