@@ -9,7 +9,7 @@ require "thread"
 
 require "packet/bin_parser"
 require "packet/packet_guid"
-require "packet/class_helpers"
+require "packet/packet_helper"
 require "packet/thread_pool"
 require "packet/double_keyed_hash"
 require "packet/event"
