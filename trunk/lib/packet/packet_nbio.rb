@@ -60,11 +60,8 @@ module Packet
       data_length = t_data.length
       begin
         written_length = p_sock.write_nonblock(t_data)
-        if written_length == data_length
-          return ""
-        else
-          return t_data[written_length..-1]
-        end
+        return "" if written_length == data_length
+        return t_data[written_length..-1]
       rescue Errno::EAGAIN
         return t_data[written_length..-1]
       rescue Errno::EPIPE

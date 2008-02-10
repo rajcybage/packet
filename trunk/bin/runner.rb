@@ -4,7 +4,7 @@ EVAL_APP_ROOT = File.expand_path(File.join(File.dirname(__FILE__) + "/.."))
 WORKER_ROOT = EVAL_APP_ROOT + "/worker"
 
 require "packet"
-require "buftok"
+#require "buftok"
 
 class Foo
   def receive_data p_data

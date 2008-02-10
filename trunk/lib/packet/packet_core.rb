@@ -11,6 +11,7 @@ module Packet
         attr_accessor :read_ios, :write_ios, :listen_sockets
         attr_accessor :connection_completion_awaited,:write_scheduled
         attr_accessor :connections, :thread_pool, :windows_flag
+        attr_accessor :internal_scheduled_write 
         include CommonMethods
       end
     end
@@ -101,15 +102,6 @@ module Packet
           connections.delete(t_sock.fileno)
           t_sock.close
         rescue
-        end
-      end
-
-      def socket_really_connected?(t_sock)
-        begin
-          t_data = read_data(t_sock)
-          return true
-        rescue DisconnectError
-          return false
         end
       end
 
@@ -243,6 +235,9 @@ module Packet
         @write_ios ||= []
         @connection_completion_awaited ||= {}
         @write_scheduled ||= {}
+        @internal_scheduled_write ||= {}
+        # internal outbound data
+        @outbound_data = []
         @connections ||= {}
         @listen_sockets ||= {}
         @binding = 0

@@ -16,7 +16,7 @@ NAME = "packet"
 $LOAD_PATH.unshift __DIR__+'/lib'
 require 'packet'
 
-CLEAN.include ['**/.*.sw?', '*.gem', '.config']
+CLEAN.include ['**/.*.sw?', '*.gem', '.config','*.rbc']
 
 
 @windows = (PLATFORM =~ /win32/)
