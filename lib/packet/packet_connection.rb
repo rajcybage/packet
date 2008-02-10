@@ -7,7 +7,11 @@ module Packet
 
     def send_data p_data
       @outbound_data << p_data
-      write_and_schedule
+      begin
+        write_and_schedule(connection) 
+      rescue DisconnectError => sock
+        close_connection
+      end
     end
 
     def invoke_init
@@ -17,7 +21,7 @@ module Packet
       post_init if respond_to?(:post_init)
     end
 
-    def close_connection
+    def close_connection(sock = nil)
       unbind if respond_to?(:unbind)
       reactor.cancel_write(connection)
       reactor.remove_connection(connection)
@@ -32,26 +36,5 @@ module Packet
       dump_object(p_object,connection)
     end
 
-    # write the data in socket buffer and schedule the thing
-    def write_and_schedule
-      @outbound_data.each_with_index do |t_data,index|
-        begin
-          leftover = write_once(t_data,connection)
-        rescue DisconnectError => e
-          close_connection
-          @connection_live = false
-          break
-        end
-
-        if leftover.empty?
-          @outbound_data.delete_at(index)
-        else
-          @outbound_data[index] = leftover
-          reactor.schedule_write(connection)
-          break
-        end
-      end
-      reactor.cancel_write(connection) if @outbound_data.empty?
-    end
   end # end of class Connection
 end # end of module Packet
