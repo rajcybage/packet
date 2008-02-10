@@ -11,7 +11,7 @@ module Packet
         attr_accessor :read_ios, :write_ios, :listen_sockets
         attr_accessor :connection_completion_awaited,:write_scheduled
         attr_accessor :connections, :thread_pool, :windows_flag
-        attr_accessor :internal_scheduled_write 
+        attr_accessor :internal_scheduled_write,:outbound_data,:reactor
         include CommonMethods
       end
     end
@@ -133,26 +133,35 @@ module Packet
       end
 
       def schedule_write(t_sock)
-        unless write_scheduled[t_sock.fileno]
+        fileno = t_sock.fileno
+        if UNIXSocket === t_sock && internal_scheduled_write[fileno].nil?
           write_ios << t_sock
-          write_scheduled[t_sock.fileno] ||= connections[t_sock.fileno].instance
+          internal_scheduled_write[t_sock.fileno] ||= self
+        elsif write_scheduled[fileno].nil?
+          write_ios << t_sock
+          write_scheduled[fileno] ||= connections[fileno].instance
         end
       end
 
       def cancel_write(t_sock)
+        fileno = t_sock.fileno
+        if UNIXSocket === t_sock
+          internal_scheduled_write.delete(fileno)
+        else
+          write_scheduled.delete(fileno)
+        end
         write_ios.delete(t_sock)
-        begin
-          write_scheduled.delete(t_sock.fileno)
-        rescue; end
       end
 
       def handle_write_event(p_ready_fds)
-        ready_fds = p_ready_fds.map { |x| x.fileno }
-        ready_fds.each do |sock_fd|
-          if extern_opts = connection_completion_awaited[sock_fd]
-            complete_connection(t_sock,extern_opts)
-          else handler_instance = write_scheduled[sock_fd]
-            handler_instance.write_and_schedule
+        p_ready_fds.each do |sock_fd|
+          fileno = sock_fd.fileno
+          if UNIXSocket == sock_fd && internal_scheduled_write[fileno]
+            write_and_schedule(sock_fd)
+          elsif extern_opts = connection_completion_awaited[fileno]
+            complete_connection(sock_fd,extern_opts)
+          elsif handler_instance = write_scheduled[fileno]
+            handler_instance.write_scheduled(sock_fd)
           end
         end
       end
@@ -246,6 +255,7 @@ module Packet
         @timer_hash ||= {}
         # @thread_pool = ThreadPool.new(thread_pool_size || 20)
         @windows_flag = windows?
+        @reactor = self
       end
 
       def windows?
@@ -265,6 +275,15 @@ module Packet
             @timer_hash.delete(key) if !timer.respond_to?(:interval)
           end
         end
+      end
+      
+      # close the connection with internal specified socket
+      def close_connection(sock = nil)
+        begin
+          read_ios.delete(sock.fileno)
+          write_ios.delete(sock.fileno)
+          sock.close
+        rescue; end
       end
 
       def initialize_handler(p_module)

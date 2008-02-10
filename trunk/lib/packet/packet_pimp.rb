@@ -6,13 +6,15 @@ module Packet
     iattr_accessor :pimp_name
     attr_accessor :lifeline, :pid, :signature
     attr_accessor :fd_write_end
-    attr_accessor :workers, :reactor
+    attr_accessor :workers, :reactor,:outbound_data
+
 
     def initialize(lifeline_socket,worker_pid,p_reactor)
       @lifeline = lifeline_socket
       @pid = worker_pid
       @reactor = p_reactor
       @signature = Guid.hexdigest
+      @outbound_data = []
       pimp_init if self.respond_to?(:pimp_init)
     end
 

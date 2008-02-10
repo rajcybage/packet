@@ -8,13 +8,14 @@ require "packet"
 
 class Foo
   def receive_data p_data
+    p p_data
     # @tokenizer.extract(p_data).each do |t_data|
-    send_data(p_data)
+    # send_data(p_data)
     #     end
 
 #     data_callback = Packet::Callback.new { |data| show_result(data) }
 #     workers[:no_proxy_worker].send_request(:data => p_data,:callback => data_callback)
-    # ask_worker(:no_proxy_worker,:data => p_data, :type => :request)
+    ask_worker(:no_proxy_worker,:data => p_data, :type => :request)
     # ask_worker(:dynamic_worker,:job_key => :hello_world, :data => p_data, :type => :request)
   end
 
@@ -39,7 +40,7 @@ class Foo
   end
 
   def post_init
-    @tokenizer = BufferedTokenizer.new
+    # @tokenizer = BufferedTokenizer.new
   end
 
   def wow
