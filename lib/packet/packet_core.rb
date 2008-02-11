@@ -154,7 +154,7 @@ module Packet
       def handle_write_event(p_ready_fds)
         p_ready_fds.each do |sock_fd|
           fileno = sock_fd.fileno
-          if UNIXSocket == sock_fd && internal_scheduled_write[fileno]
+          if UNIXSocket === sock_fd && internal_scheduled_write[fileno]
             write_and_schedule(sock_fd)
           elsif extern_opts = connection_completion_awaited[fileno]
             complete_connection(sock_fd,extern_opts)
