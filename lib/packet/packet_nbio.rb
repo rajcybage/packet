@@ -14,7 +14,7 @@ module Packet
       sock_data = []
       begin
         while(t_data = t_sock.recv_nonblock((16*1024)-1))
-          raise DisconnectError.new(t_sock) if t_data.empty?
+          raise DisconnectError.new(t_sock,sock_data.join) if t_data.empty?
           sock_data << t_data
         end
       rescue Errno::EAGAIN
@@ -22,7 +22,7 @@ module Packet
       rescue Errno::EWOULDBLOCK
         return sock_data.join
       rescue
-        raise DisconnectError.new(t_sock)
+        raise DisconnectError.new(t_sock,sock_data.join)
       end
     end
 

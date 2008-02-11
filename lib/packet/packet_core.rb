@@ -6,11 +6,10 @@ module Packet
       base_klass.instance_eval do
         @@connection_callbacks ||= {}
 
-        iattr_accessor :thread_pool_size
         cattr_accessor :connection_callbacks
         attr_accessor :read_ios, :write_ios, :listen_sockets
         attr_accessor :connection_completion_awaited,:write_scheduled
-        attr_accessor :connections, :thread_pool, :windows_flag
+        attr_accessor :connections, :windows_flag
         attr_accessor :internal_scheduled_write,:outbound_data,:reactor
         include CommonMethods
       end
@@ -120,7 +119,6 @@ module Packet
         Signal.trap("INT") { shutdown }
         loop do
           check_for_timer_events
-          user_thread_window #=> let user level threads run for a while
           ready_read_fds,ready_write_fds,read_error_fds = select(read_ios,write_ios,nil,0.005)
 
           if ready_read_fds && !ready_read_fds.empty?
@@ -175,11 +173,6 @@ module Packet
             handle_external_messages(t_sock)
           end
         end
-      end
-
-      def user_thread_window
-        # run_user_threads if respond_to?(:run_user_threads)
-        # @thread_pool.exclusive_run
       end
 
       def terminate_me

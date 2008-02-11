@@ -14,7 +14,7 @@ module Packet
 
     def self.run
       master_reactor_instance = new
-      # master_reactor_instance.result_hash = {}
+      master_reactor_instance.result_hash = {}
       master_reactor_instance.live_workers = DoubleKeyedHash.new
       yield(master_reactor_instance)
       master_reactor_instance.load_workers
@@ -34,7 +34,6 @@ module Packet
       class << handler_instance
         extend Forwardable
         attr_accessor :workers,:connection,:reactor, :initialized,:signature
-        attr_accessor :thread_pool
         include NbioHelper
         include Connection
         def ask_worker(*args)
@@ -52,7 +51,6 @@ module Packet
       handler_instance.workers = @live_workers
       handler_instance.connection = t_sock
       handler_instance.reactor = self
-      handler_instance.thread_pool = @thread_pool
     end
 
     # FIXME: right now, each worker is tied to its connection and this can be problematic
@@ -65,10 +63,16 @@ module Packet
         # t_data = Marshal.load(raw_data)
         worker_instance.receive_data(raw_data) if worker_instance.respond_to?(:receive_data)
       rescue DisconnectError => sock_error
-        read_ios.delete(t_sock)
+        remove_worker(t_sock)
       end
     end
+    
 
+    def remove_worker(t_sock)
+      @live_workers.delete(t_sock.fileno)
+      read_ios.delete(t_sock)
+    end
+    
     def delete_worker(worker_options = {})
       worker_name = worker_options[:worker]
       worker_name_key = gen_worker_key(worker_name,worker_options[:job_key])
@@ -100,10 +104,14 @@ module Packet
       worker_options.delete(:worker)
       begin
         require worker_name
+        worker_klass = Object.const_get(packet_classify(worker_name))
+        fork_and_load(worker_klass,worker_options)
       rescue LoadError
+        puts "no such worker #{worker_name}" 
+      rescue MissingSourceFile
+        puts "no such worker #{worker_name}" 
+        return
       end
-      worker_klass = Object.const_get(packet_classify(worker_name))
-      fork_and_load(worker_klass,worker_options)
     end
 
     # method forks given worker file in a new process
@@ -116,14 +124,14 @@ module Packet
       master_read_end,worker_write_end = UNIXSocket.pair(Socket::SOCK_STREAM)
       # socket to which master process is going to write
       worker_read_end,master_write_end = UNIXSocket.pair(Socket::SOCK_STREAM)
-      worker_read_fd,master_write_fd = UNIXSocket.pair
+      # worker_read_fd,master_write_fd = UNIXSocket.pair
 
       if((pid = fork()).nil?)
         $0 = "ruby #{worker_klass.worker_name}"
-        [master_write_end,master_read_end,master_write_fd].each { |x| x.close }
+        [master_write_end,master_read_end].each { |x| x.close }
 
         worker_klass.start_worker(:write_end => worker_write_end,:read_end => worker_read_end,\
-                                  :read_fd => worker_read_fd,:options => worker_options)
+                                  :options => worker_options)
       end
       Process.detach(pid)
 
@@ -136,12 +144,12 @@ module Packet
       else
         t_pimp = Packet::MetaPimp.new(master_write_end,pid,self)
         t_pimp.worker_key = worker_name_key
+        t_pimp.worker_name = t_worker_name
         @live_workers[worker_name_key,master_read_end.fileno] = t_pimp
       end
 
       worker_read_end.close
       worker_write_end.close
-      worker_read_fd.close
       read_ios << master_read_end
     end # end of fork_and_load method
   end # end of Reactor class

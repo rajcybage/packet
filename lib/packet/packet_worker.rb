@@ -14,7 +14,6 @@ module Packet
       # @fd_reader = args.shift if args.length > 2
       @msg_writer = messengers[:write_end]
       @msg_reader = messengers[:read_end]
-      @fd_reader = messengers[:read_fd]
       t_instance = new
       t_instance.worker_options = messengers[:options]
       t_instance.worker_init if t_instance.respond_to?(:worker_init)
@@ -24,7 +23,6 @@ module Packet
     def initialize
       super
       @read_ios << msg_reader
-      @read_ios << fd_reader
       @tokenizer = BinParser.new
     end
 
@@ -61,7 +59,6 @@ module Packet
       class << handler_instance
         extend Forwardable
         attr_accessor :worker, :connection, :reactor, :initialized, :signature
-        attr_accessor :thread_pool
         include NbioHelper
         include Connection
         def_delegators :@reactor, :start_server, :connect, :add_periodic_timer, :add_timer, :cancel_timer,:reconnect
@@ -69,7 +66,6 @@ module Packet
       handler_instance.connection = connection
       handler_instance.worker = self
       handler_instance.reactor = self
-      handler_instance.thread_pool = @thread_pool
     end
 
     def log log_data
