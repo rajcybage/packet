@@ -18,6 +18,7 @@ module Packet
       t_instance.worker_options = messengers[:options]
       t_instance.worker_init if t_instance.respond_to?(:worker_init)
       t_instance.start_reactor
+      t_instance
     end
 
     def initialize
