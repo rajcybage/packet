@@ -103,6 +103,10 @@ module Packet
         rescue
         end
       end
+      
+      def next_turn &block
+        @on_next_tick = block
+      end
 
       # method opens a socket for listening
       def start_server(ip,port,t_module,&block)
@@ -119,6 +123,7 @@ module Packet
         Signal.trap("INT") { shutdown }
         loop do
           check_for_timer_events
+          @on_next_tick.call if @on_next_tick
           ready_read_fds,ready_write_fds,read_error_fds = select(read_ios,write_ios,nil,0.005)
 
           if ready_read_fds && !ready_read_fds.empty?
@@ -243,6 +248,7 @@ module Packet
         @connections ||= {}
         @listen_sockets ||= {}
         @binding = 0
+        @on_next_tick = nil
 
         # @timer_hash = Packet::TimerStore
         @timer_hash ||= {}
