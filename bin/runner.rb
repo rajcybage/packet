@@ -51,5 +51,6 @@ end
 
 Packet::Reactor.run do |t_reactor|
   t_reactor.start_server("0.0.0.0", 11007,Foo)
+  #t_reactor.next_turn { a = 10 }
 end
 
