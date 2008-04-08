@@ -53,7 +53,9 @@ module Packet
 
       def reconnect(server,port,handler)
         raise "invalid handler" unless handler.respond_to?(:connection_completed)
-        return handler if connections.keys.include?(handler.connection.fileno)
+        if !handler.closed? && connections.keys.include?(handler.connection.fileno)
+          return handler
+        end
         connect(server,port,handler)
       end
 
@@ -103,7 +105,7 @@ module Packet
         rescue
         end
       end
-      
+
       def next_turn &block
         @on_next_tick = block
       end
@@ -124,6 +126,7 @@ module Packet
         loop do
           check_for_timer_events
           @on_next_tick.call if @on_next_tick
+
           ready_read_fds,ready_write_fds,read_error_fds = select(read_ios,write_ios,nil,0.005)
 
           if ready_read_fds && !ready_read_fds.empty?
@@ -211,6 +214,7 @@ module Packet
           t_data = read_data(t_sock)
           handler_instance.receive_data(t_data) if handler_instance.respond_to?(:receive_data)
         rescue DisconnectError => sock_error
+          handler_instance.receive_data(sock_error.data) if handler_instance.respond_to?(:receive_data)
           handler_instance.close_connection
         end
       end
@@ -273,9 +277,10 @@ module Packet
             timer.run
             @timer_hash.delete(key) if !timer.respond_to?(:interval)
           end
+
         end
       end
-      
+
       # close the connection with internal specified socket
       def close_connection(sock = nil)
         begin
