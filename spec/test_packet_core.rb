@@ -1,4 +1,5 @@
 require File.join(File.dirname(__FILE__) + "/spec_helper")
+
 context "Packet Core in general when mixed inside a class" do
   xspecify "allow the class to act as a reactor" do
   end

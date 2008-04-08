@@ -6,28 +6,30 @@ class Foo
   end
   
   def post_init
-    puts "An external client connected" 
+    puts "Post Init test on server : passed"
   end
   
   def unbind
-    puts "external client disconnected" 
+    puts "Unbind test on server: passed" 
   end
 end
 
 class Bar
-  
   def receive_data data
-    puts "received #{data}" 
-    @count += 1
+    if data == "fuck\n"
+      puts "Echo Server test passed" 
+    else
+      puts "Echo Server test failed" 
+    end
+    close_connection
   end
   
   def post_init
-    @count = 0
-    puts "calling post init in client handler" 
+    puts "post init test on client: passed" 
   end
   
   def connection_completed
-    100.times { |x| send_data("lol : #{x}\n")}
+    send_data "fuck\n"
   end
   
   def unbind

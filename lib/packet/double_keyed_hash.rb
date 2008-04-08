@@ -15,8 +15,14 @@ class DoubleKeyedHash
   end
 
   def delete(key)
-    @keys1.delete(key)
-    @internal_hash.delete(key)
+    t_key = @keys1[key]
+    if t_key
+      @keys1.delete(key)
+      @internal_hash.delete(t_key)
+    else
+      @keys1.delete_if { |key,value| value == key }
+      @internal_hash.delete(key)
+    end
   end
 
   def each
