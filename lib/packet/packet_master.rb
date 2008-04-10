@@ -63,16 +63,17 @@ module Packet
         # t_data = Marshal.load(raw_data)
         worker_instance.receive_data(raw_data) if worker_instance.respond_to?(:receive_data)
       rescue DisconnectError => sock_error
+        worker_instance.receive_data(sock_error.data) if worker_instance.respond_to?(:receive_data)
         remove_worker(t_sock)
       end
     end
-    
+
 
     def remove_worker(t_sock)
       @live_workers.delete(t_sock.fileno)
       read_ios.delete(t_sock)
     end
-    
+
     def delete_worker(worker_options = {})
       worker_name = worker_options[:worker]
       worker_name_key = gen_worker_key(worker_name,worker_options[:job_key])
@@ -107,9 +108,9 @@ module Packet
         worker_klass = Object.const_get(packet_classify(worker_name))
         fork_and_load(worker_klass,worker_options)
       rescue LoadError
-        puts "no such worker #{worker_name}" 
+        puts "no such worker #{worker_name}"
       rescue MissingSourceFile
-        puts "no such worker #{worker_name}" 
+        puts "no such worker #{worker_name}"
         return
       end
     end
