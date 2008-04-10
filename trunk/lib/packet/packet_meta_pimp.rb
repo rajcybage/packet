@@ -44,7 +44,7 @@ class Packet::MetaPimp < Packet::Pimp
   end
 
   def process_request(data_options = {})
-    if requested_worker = data_options[:requested_worker] && reactor.live_workers[requested_worker]
+    if((requested_worker = data_options[:requested_worker]) && (reactor.live_workers[requested_worker]))
       reactor.live_workers[requested_worker].send_request(data_options)
     end
   end
