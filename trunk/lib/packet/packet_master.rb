@@ -53,14 +53,11 @@ module Packet
       handler_instance.reactor = self
     end
 
-    # FIXME: right now, each worker is tied to its connection and this can be problematic
-    # what if a worker wants to return results in a async manner
     def handle_internal_messages(t_sock)
       sock_fd = t_sock.fileno
       worker_instance = @live_workers[sock_fd]
       begin
         raw_data = read_data(t_sock)
-        # t_data = Marshal.load(raw_data)
         worker_instance.receive_data(raw_data) if worker_instance.respond_to?(:receive_data)
       rescue DisconnectError => sock_error
         worker_instance.receive_data(sock_error.data) if worker_instance.respond_to?(:receive_data)
@@ -115,7 +112,7 @@ module Packet
       end
     end
 
-    # method forks given worker file in a new process
+
     # method should use job_key if provided in options hash.
     def fork_and_load(worker_klass,worker_options = { })
       t_worker_name = worker_klass.worker_name
