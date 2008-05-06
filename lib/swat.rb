@@ -1,5 +1,5 @@
 module Swat
-  VERSION = "1.0.1"
+  VERSION = "1.0.2"
   class SwatMain
     attr_accessor :todo_window
     attr_accessor :status_icon
