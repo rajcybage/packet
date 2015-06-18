@@ -1,0 +1,1 @@
+I intend to write a framework for writing fast and scalable network applications in ruby.
